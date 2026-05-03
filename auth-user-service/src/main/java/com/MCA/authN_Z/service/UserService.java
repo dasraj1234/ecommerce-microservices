@@ -1,6 +1,8 @@
 package com.MCA.authN_Z.service;
 
 
+import java.util.UUID;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -27,5 +29,13 @@ public class UserService {
 
         user.setRole("USER");
         return repo.save(user);
+    }
+
+    public User getUserById(UUID id) {
+       return repo.findById(id).orElse(null);
+    }
+
+    public Iterable<User> getAllUsers() {
+        return repo.findAll();
     }
 }
