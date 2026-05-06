@@ -18,5 +18,4 @@ public class LoginResponse {
         this.username = username;
         this.role = role;
     }
-
 }
