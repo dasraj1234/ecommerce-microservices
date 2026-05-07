@@ -24,7 +24,7 @@ public class AuthService {
                 request.getPassword()
             )
         );
-        System.out.println("Authentication result: " + authN.isAuthenticated());
+        //System.out.println("Authentication result: " + authN.isAuthenticated());
         if (authN.isAuthenticated()) {
             String token = jwtUtil.generateToken(request.getUsername());
              String role = authN.getAuthorities()

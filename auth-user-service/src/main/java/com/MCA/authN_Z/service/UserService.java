@@ -38,4 +38,8 @@ public class UserService {
     public Iterable<User> getAllUsers() {
         return repo.findAll();
     }
+
+    public User getUserByUsername(String username) {
+        return repo.findByUsername(username);
+    }
 }

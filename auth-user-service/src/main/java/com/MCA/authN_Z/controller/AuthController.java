@@ -17,7 +17,7 @@ public class AuthController {
     private AuthService authService;
     @PostMapping("/login")
     public LoginResponse login(@RequestBody LoginRequest request) {
-        System.out.println("Login request received: " + request.getUsername());
+        //System.out.println("Login request received: " + request.getUsername());
         return authService.login(request);
     }
 }
