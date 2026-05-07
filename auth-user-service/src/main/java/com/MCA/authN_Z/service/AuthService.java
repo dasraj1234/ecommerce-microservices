@@ -24,12 +24,18 @@ public class AuthService {
                 request.getPassword()
             )
         );
+        System.out.println("Authentication result: " + authN.isAuthenticated());
         if (authN.isAuthenticated()) {
             String token = jwtUtil.generateToken(request.getUsername());
+             String role = authN.getAuthorities()
+                           .stream()
+                           .findFirst()
+                           .get()
+                           .getAuthority();
             return new LoginResponse(
                 token,
                 request.getUsername(),
-                authN.getAuthorities().toString()
+                role
             );
         } else {
             throw new RuntimeException("Invalid username or password");
