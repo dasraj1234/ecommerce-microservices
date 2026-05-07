@@ -8,6 +8,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 
 import com.MCA.authN_Z.dto.LoginRequest;
 import com.MCA.authN_Z.dto.LoginResponse;
+import com.MCA.authN_Z.exception.InvalidCredentialsException;
 import com.MCA.authN_Z.utill.JwtUtil;
 @Service
 public class AuthService {
@@ -38,7 +39,7 @@ public class AuthService {
                 role
             );
         } else {
-            throw new RuntimeException("Invalid username or password");
+            throw new InvalidCredentialsException("Invalid username or password");
         }
     }  
 }

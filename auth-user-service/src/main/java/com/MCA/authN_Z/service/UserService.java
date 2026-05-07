@@ -9,6 +9,8 @@ import org.springframework.stereotype.Service;
 
 import com.MCA.authN_Z.dto.RegisterRequest;
 import com.MCA.authN_Z.entity.User;
+import com.MCA.authN_Z.exception.ResourceNotFoundException;
+import com.MCA.authN_Z.exception.UserAlreadyExistsException;
 import com.MCA.authN_Z.repository.UserRepository;
 
 @Service
@@ -20,6 +22,9 @@ public class UserService {
 
     public User register(RegisterRequest req) {
 
+        if (repo.existsByUsername(req.getUsername())) {
+            throw new UserAlreadyExistsException("Username already exists");
+        }
         User user = new User();
         user.setUsername(req.getUsername());
         user.setEmail(req.getEmail());
@@ -32,7 +37,8 @@ public class UserService {
     }
 
     public User getUserById(UUID id) {
-       return repo.findById(id).orElse(null);
+       return repo.findById(id).orElseThrow(() ->
+            new ResourceNotFoundException("User not found"));
     }
 
     public Iterable<User> getAllUsers() {

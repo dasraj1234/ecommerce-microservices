@@ -33,7 +33,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         FilterChain filterChain
     )
         throws ServletException, IOException {
-
+            try {
             String authHeader = request.getHeader("Authorization");
             String username = null;
             String token = null;
@@ -55,7 +55,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     SecurityContextHolder.getContext().setAuthentication(authToken);
                 }
             }
-        
+        } catch (Exception e) {
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED,"Invalid JWT Token");
+        }
         filterChain.doFilter(request, response);
     }
 }
