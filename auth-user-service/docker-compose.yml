@@ -1,11 +1,12 @@
 services:
   postgres:
-    image: postgres
-    container_name: postgres-db
+    image: postgres:15
     environment:
       POSTGRES_DB: mydb
       POSTGRES_USER: myuser
       POSTGRES_PASSWORD: mypassword
+      TZ: Asia/Kolkata       
+      PGTZ: Asia/Kolkata
     ports:
       - "5432:5432"
     volumes:
