@@ -2,7 +2,7 @@ package com.ecommerce.paymentwallet.payment.service;
 
 import com.ecommerce.paymentwallet.payment.dto.*;
 import com.ecommerce.paymentwallet.payment.repository.PaymentRepository;
-import com.ecommerce.paymentwallet.payment.repository.PaymentLogRepository;
+//import com.ecommerce.paymentwallet.payment.repository.PaymentLogRepository;
 import com.ecommerce.paymentwallet.common.util.IdGenerator;
 import com.ecommerce.paymentwallet.common.exception.BadRequestException;
 
@@ -16,7 +16,7 @@ import org.springframework.stereotype.Service;
 public class PaymentService {
 
     private final PaymentRepository paymentRepo;
-    private final PaymentLogRepository logRepo;
+   //private final PaymentLogRepository logRepo;
     private final WalletAdapter walletAdapter;
     private final OrderClient orderClient;
     private final IdGenerator idGenerator;
