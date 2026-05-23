@@ -1,0 +1,47 @@
+package com.ecommerce.productorder.inventory.repository;
+
+import com.ecommerce.productorder.sql.SqlQueries;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.stereotype.Repository;
+
+@Repository
+public class InventoryRepository {
+
+    private final JdbcTemplate jdbcTemplate;
+
+    public InventoryRepository(JdbcTemplate jdbcTemplate) {
+
+        this.jdbcTemplate = jdbcTemplate;
+
+    }
+
+    public boolean reduceStock(String productId,
+                               Integer quantity) {
+
+        int rows = jdbcTemplate.update(
+
+                SqlQueries.REDUCE_STOCK,
+
+                quantity,
+
+                productId,
+
+                quantity
+        );
+
+        return rows > 0;
+    }
+
+    public void restoreStock(String productId,
+                             Integer quantity) {
+
+        jdbcTemplate.update(
+
+                SqlQueries.RESTORE_STOCK,
+
+                quantity,
+
+                productId
+        );
+    }
+}
