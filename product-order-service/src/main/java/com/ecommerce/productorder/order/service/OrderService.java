@@ -1,6 +1,7 @@
 package com.ecommerce.productorder.order.service;
 
 import com.ecommerce.productorder.client.PaymentClient;
+import com.ecommerce.productorder.client.dto.PaymentResponse;
 import com.ecommerce.productorder.common.exception.InsufficientStockException;
 import com.ecommerce.productorder.common.exception.OrderNotFoundException;
 import com.ecommerce.productorder.common.util.IdGenerator;
@@ -59,139 +60,168 @@ public class OrderService {
         this.idGenerator = idGenerator;
     }
 
-    @Transactional
+    //@Transactional
     public OrderResponse createOrder(OrderRequest request) {
 
-        LOGGER.info("Creating order for user {}", request.getUserId());
+    LOGGER.info("Creating order for user {}", request.getUserId());
 
-        boolean stockUpdated =
-                inventoryRepository.reduceStock(
+    boolean stockUpdated =
+            inventoryRepository.reduceStock(
+                    request.getProductId(),
+                    request.getQuantity()
+            );
 
-                        request.getProductId(),
-
-                        request.getQuantity()
-                );
-
-        if (!stockUpdated) {
-
-            throw new InsufficientStockException(request.getProductId());
-        }
-
-        String orderId =
-                idGenerator.generateOrderId();
-
-        String idempotencyKey =
-                idGenerator.generateIdempotencyKey();
-
-        orderRepository.createOrder(
-
-                orderId,
-
-                request,
-
-                idempotencyKey
+    if (!stockUpdated) {
+        throw new InsufficientStockException(
+                request.getProductId()
         );
+    }
 
-        orderRepository.updateOrderStatus(
+    String orderId =
+            idGenerator.generateOrderId();
 
-                orderId,
+    String idempotencyKey =
+            idGenerator.generateIdempotencyKey();
 
-                OrderStatus.PROCESSING.name()
-        );
+    orderRepository.createOrder(
+            orderId,
+            request,
+            idempotencyKey
+    );
 
-        itemRepository.save(
+    orderRepository.updateOrderStatus(
+            orderId,
+            OrderStatus.PROCESSING.name()
+    );
 
-                orderId,
+    itemRepository.save(
+            orderId,
+            request.getProductId(),
+            request.getQuantity(),
+            request.getTotalAmount(),
+            request.getTotalAmount()
+    );
 
-                request.getProductId(),
+    PaymentRequest paymentRequest =
+            new PaymentRequest();
 
-                request.getQuantity(),
+    paymentRequest.setUserId(
+            request.getUserId()
+    );
 
-                request.getTotalAmount(),
+    paymentRequest.setAmount(
+            request.getTotalAmount()
+    );
 
-                request.getTotalAmount()
-        );
+    paymentRequest.setOrderId(
+            orderId
+    );
 
-        PaymentRequest paymentRequest =
-                new PaymentRequest();
+    paymentRequest.setIdempotencyKey(
+            idempotencyKey
+    );
 
-        paymentRequest.setUserId(
-                request.getUserId()
-        );
+    try {
 
-        paymentRequest.setAmount(
-                request.getTotalAmount()
-        );
-
-        paymentRequest.setOrderId(orderId);
-
-        paymentRequest.setIdempotencyKey(
-                idempotencyKey
-        );
-
-        String paymentResponse =
+        PaymentResponse paymentResponse =
                 paymentClient.processPayment(
                         paymentRequest
                 );
 
-        orderRepository.updateOrderStatus(
+        if ("SUCCESS".equals(
+                paymentResponse.getStatus())) {
 
-                orderId,
+            orderRepository.updateOrderStatus(
+                    orderId,
+                    OrderStatus.CONFIRMED.name(),
+                    paymentResponse.getPaymentId()
+            );
 
-                OrderStatus.CONFIRMED.name(),
+            logRepository.save(
+                    orderId,
+                    JsonUtil.toJson(request),
+                    JsonUtil.toJson(paymentResponse),
+                    "SUCCESS",
+                    "PAYMENT_SUCCESS"
+            );
 
-                paymentResponse
-        );
+            LOGGER.info(
+                    "Order {} confirmed and inventory reduced",
+                    orderId
+            );
 
-        logRepository.save(
+            OrderResponse response =
+                    new OrderResponse();
 
-                orderId,
+            response.setOrderId(orderId);
+            response.setStatus(
+                    OrderStatus.CONFIRMED.name()
+            );
+            response.setMessage(
+                    "Order placed successfully"
+            );
 
-                JsonUtil.toJson(request),
+            return response;
 
-                paymentResponse,
+        } else {
 
-                "SUCCESS",
+            inventoryRepository.restoreStock(
+                    request.getProductId(),
+                    request.getQuantity()
+            );
 
-                "PAYMENT_SUCCESS"
-        );
+            orderRepository.updateOrderStatus(
+                    orderId,
+                    OrderStatus.CANCELLED.name()
+            );
 
-        LOGGER.info("Order {} confirmed and inventory reduced", orderId);
+            logRepository.save(
+                    orderId,
+                    JsonUtil.toJson(request),
+                    JsonUtil.toJson(paymentResponse),
+                    "FAILED",
+                    paymentResponse.getMessage()
+            );
 
-        OrderResponse response = new OrderResponse();
-        response.setOrderId(orderId);
-        response.setStatus(OrderStatus.CONFIRMED.name());
-        response.setMessage("Order placed successfully");
-
-        return response;
-    }
-
-    @Transactional
-    public OrderResponse updateStatus(String orderId,
-                                      OrderStatus status) {
-
-        String currentStatus = orderRepository.findStatusByOrderId(orderId)
-                .orElseThrow(() -> new OrderNotFoundException(orderId));
-
-        if (OrderStatus.CANCELLED.name().equals(currentStatus)) {
-            throw new IllegalStateException("Cancelled order cannot be updated");
+            throw new RuntimeException(
+                    paymentResponse.getMessage()
+            );
         }
 
-        int rows = orderRepository.updateOrderStatus(orderId, status.name());
+    } catch (Exception ex) {
 
-        if (rows == 0) {
-            throw new OrderNotFoundException(orderId);
-        }
+    inventoryRepository.restoreStock(
+            request.getProductId(),
+            request.getQuantity()
+    );
 
-        LOGGER.info("Order {} moved from {} to {}", orderId, currentStatus, status);
+    orderRepository.updateOrderStatus(
+            orderId,
+            OrderStatus.CANCELLED.name()
+    );
 
-        OrderResponse response = new OrderResponse();
-        response.setOrderId(orderId);
-        response.setStatus(status.name());
-        response.setMessage("Order status updated successfully");
+    logRepository.save(
+            orderId,
+            JsonUtil.toJson(request),
+            "{}",
+            "FAILED",
+            ex.getMessage()
+    );
 
-        return response;
-    }
+    OrderResponse response =
+            new OrderResponse();
+
+    response.setOrderId(orderId);
+    response.setStatus(
+            OrderStatus.CANCELLED.name()
+    );
+    response.setMessage(
+        ex.getMessage()
+);
+
+    return response;
+}
+}
 
     @Transactional
     public OrderResponse cancelOrder(String orderId) {
@@ -228,5 +258,10 @@ public class OrderService {
     public List<OrderHistoryResponse> history(String userId) {
 
         return orderRepository.findHistoryByUserId(userId);
+    }
+
+    public OrderResponse updateStatus(String orderId, OrderStatus status) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'updateStatus'");
     }
 }

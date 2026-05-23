@@ -5,6 +5,8 @@ import com.ecommerce.productorder.product.dto.ProductRequest;
 import com.ecommerce.productorder.product.dto.ProductResponse;
 import com.ecommerce.productorder.product.service.ProductService;
 
+import io.swagger.v3.oas.annotations.Operation;
+
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -21,6 +23,7 @@ public class ProductController {
         this.service = service;
     }
 
+    @Operation(summary = "Create new product")
     @PostMapping("/create")
     public ApiResponse<String> create(@RequestBody ProductRequest request) {
 
@@ -30,6 +33,7 @@ public class ProductController {
         );
     }
 
+    @Operation(summary = "Search products")
     @GetMapping("/search")
     public ApiResponse<List<ProductResponse>> search(@RequestParam(required = false) String name,
                                                      @RequestParam(required = false) String category,

@@ -1,0 +1,34 @@
+:root{
+
+    --navy:#0B2447;
+    --navy-light:#19376D;
+
+    --orange:#FF8C32;
+
+    --green:#22C55E;
+
+    --red:#EF4444;
+
+    --white:#FFFFFF;
+
+    --bg:#F5F7FA;
+
+    --text:#1E293B;
+}
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+
+    background:var(--bg);
+
+    font-family:
+            "Segoe UI",
+            sans-serif;
+
+    color:var(--text);
+}

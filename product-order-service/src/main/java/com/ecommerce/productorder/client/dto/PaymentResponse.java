@@ -1,21 +1,10 @@
-package com.ecommerce.paymentwallet.payment.dto;
+package com.ecommerce.productorder.client.dto;
 
 public class PaymentResponse {
 
     private String paymentId;
     private String status;
     private String message;
-
-    public PaymentResponse() {
-    }
-
-    public PaymentResponse(String paymentId,
-                           String status,
-                           String message) {
-        this.paymentId = paymentId;
-        this.status = status;
-        this.message = message;
-    }
 
     public String getPaymentId() {
         return paymentId;

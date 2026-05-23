@@ -1,10 +1,14 @@
 package com.ecommerce.paymentwallet.payment.service;
 
+import com.ecommerce.paymentwallet.wallet.service.WalletService;
 import com.ecommerce.paymentwallet.payment.dto.*;
 import com.ecommerce.paymentwallet.payment.repository.PaymentRepository;
-//import com.ecommerce.paymentwallet.payment.repository.PaymentLogRepository;
+import com.ecommerce.paymentwallet.payment.repository.PaymentLogRepository;
 import com.ecommerce.paymentwallet.common.util.IdGenerator;
+import com.ecommerce.paymentwallet.common.util.JsonUtil;
 import com.ecommerce.paymentwallet.common.exception.BadRequestException;
+
+import java.util.List;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -15,36 +19,48 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class PaymentService {
 
+    private final WalletService walletService;
+
     private final PaymentRepository paymentRepo;
-   //private final PaymentLogRepository logRepo;
-    private final WalletAdapter walletAdapter;
-    private final OrderClient orderClient;
+
+    private final PaymentLogRepository logRepo;
+
     private final IdGenerator idGenerator;
 
-    public PaymentResponse processPayment(PaymentRequest req) {
+    public PaymentResponse processPayment(
+            PaymentRequest req) {
 
-        log.info("Processing payment for user {}", req.getUserId());
+        log.info(
+                "Processing payment for user {}",
+                req.getUserId()
+        );
 
-        // 🔥 VALIDATIONS
-        if (req.getOrderId() == null || req.getOrderId().isBlank()) {
-            throw new BadRequestException("Order ID is required");
+        if (req.getOrderId() == null
+                || req.getOrderId().isBlank()) {
+
+            throw new BadRequestException(
+                    "Order ID is required"
+            );
         }
 
         if (req.getAmount() <= 0) {
-            throw new BadRequestException("Amount must be greater than 0");
+
+            throw new BadRequestException(
+                    "Amount must be greater than 0"
+            );
         }
 
-        // 🔥 IDEMPOTENCY CHECK
-        if (paymentRepo.existsByIdempotencyKey(req.getIdempotencyKey())) {
-            return new PaymentResponse("SUCCESS", "Duplicate request already processed");
-        }
+        if (paymentRepo.existsByIdempotencyKey(
+        req.getIdempotencyKey())) {
 
-        // 🔥 STEP 1: Validate Order via API
-        orderClient.validateOrder(req.getOrderId());
+    return paymentRepo.findByIdempotencyKey(
+            req.getIdempotencyKey()
+    );
+}
 
-        String paymentId = idGenerator.generatePaymentId();
+        String paymentId =
+                idGenerator.generatePaymentId();
 
-        // 🔥 STEP 2: Insert PENDING
         paymentRepo.insert(
                 paymentId,
                 req.getOrderId(),
@@ -56,28 +72,104 @@ public class PaymentService {
 
         try {
 
-            // 🔥 STEP 3: Call Wallet Service
-            walletAdapter.debit(req.getUserId(), req.getAmount());
+            boolean debited =
+                    walletService.debit(
+                            req.getUserId(),
+                            req.getAmount()
+                    );
 
-            // 🔥 STEP 4: Mark SUCCESS
+            if (!debited) {
+
+                paymentRepo.updateStatus(
+                        PaymentStatus.FAILED.name(),
+                        paymentId
+                );
+
+                PaymentResponse response =
+                        new PaymentResponse(
+                                paymentId,
+                                "FAILED",
+                                "Insufficient wallet balance"
+                        );
+
+                logRepo.log(
+                        paymentId,
+                        JsonUtil.toJson(req),
+                        JsonUtil.toJson(response),
+                        "FAILED",
+                        "INSUFFICIENT_BALANCE"
+                );
+
+                return response;
+            }
+
             paymentRepo.updateStatus(
                     PaymentStatus.SUCCESS.name(),
                     paymentId
             );
 
-            return new PaymentResponse("SUCCESS", "Payment successful");
+            PaymentResponse response =
+                    new PaymentResponse(
+                            paymentId,
+                            "SUCCESS",
+                            "Payment successful"
+                    );
+
+            logRepo.log(
+                    paymentId,
+                    JsonUtil.toJson(req),
+                    JsonUtil.toJson(response),
+                    "SUCCESS",
+                    "PAYMENT_SUCCESS"
+            );
+
+            return response;
 
         } catch (Exception e) {
 
-            log.error("Payment failed for {}", paymentId, e);
+            log.error(
+                    "Payment failed for {}",
+                    paymentId,
+                    e
+            );
 
-            // 🔥 STEP 5: Mark FAILED
             paymentRepo.updateStatus(
                     PaymentStatus.FAILED.name(),
                     paymentId
             );
 
-            throw e;
+            PaymentResponse response =
+                    new PaymentResponse(
+                            paymentId,
+                            "FAILED",
+                            e.getMessage()
+                    );
+
+            logRepo.log(
+                    paymentId,
+                    JsonUtil.toJson(req),
+                    JsonUtil.toJson(response),
+                    "FAILED",
+                    e.getMessage()
+            );
+
+            return response;
         }
+    }
+
+    public PaymentDetailsResponse getPayment(
+            String paymentId) {
+
+        return paymentRepo.findByPaymentId(
+                paymentId
+        );
+    }
+
+    public List<PaymentDetailsResponse> getPaymentsByUser(
+            String userId) {
+
+        return paymentRepo.findByUserId(
+                userId
+        );
     }
 }

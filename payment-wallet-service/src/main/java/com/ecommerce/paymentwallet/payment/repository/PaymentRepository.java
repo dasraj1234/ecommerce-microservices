@@ -2,6 +2,10 @@ package com.ecommerce.paymentwallet.payment.repository;
 
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
+
+import com.ecommerce.paymentwallet.payment.dto.PaymentDetailsResponse;
+import com.ecommerce.paymentwallet.payment.dto.PaymentResponse;
+
 import java.util.List;
 import java.util.Map;
 @Repository
@@ -53,4 +57,93 @@ public List<Map<String, Object>> findByStatus(String status) {
 
     return jdbcTemplate.queryForList(sql, status);
 }
+
+public PaymentDetailsResponse findByPaymentId(
+        String paymentId) {
+
+    String sql =
+            "SELECT * FROM payments WHERE payment_id=?";
+
+    return jdbcTemplate.queryForObject(
+            sql,
+            (rs,rowNum)->{
+
+                PaymentDetailsResponse p =
+                        new PaymentDetailsResponse();
+
+                p.setPaymentId(
+                        rs.getString("payment_id"));
+
+                p.setOrderId(
+                        rs.getString("order_id"));
+
+                p.setUserId(
+                        rs.getString("user_id"));
+
+                p.setAmount(
+                        rs.getDouble("amount"));
+
+                p.setStatus(
+                        rs.getString("status"));
+
+                return p;
+            },
+            paymentId
+    );
+}
+
+public List<PaymentDetailsResponse> findByUserId(
+        String userId) {
+
+    String sql =
+            "SELECT * FROM payments WHERE user_id=? ORDER BY created_date DESC";
+
+    return jdbcTemplate.query(
+            sql,
+            (rs,rowNum)->{
+
+                PaymentDetailsResponse p =
+                        new PaymentDetailsResponse();
+
+                p.setPaymentId(
+                        rs.getString("payment_id"));
+
+                p.setOrderId(
+                        rs.getString("order_id"));
+
+                p.setUserId(
+                        rs.getString("user_id"));
+
+                p.setAmount(
+                        rs.getDouble("amount"));
+
+                p.setStatus(
+                        rs.getString("status"));
+
+                return p;
+            },
+            userId
+    );
+}
+
+public PaymentResponse findByIdempotencyKey(
+        String idempotencyKey) {
+
+    String sql =
+            "SELECT payment_id,status " +
+            "FROM payments " +
+            "WHERE idempotency_key=?";
+
+    return jdbcTemplate.queryForObject(
+            sql,
+            (rs, rowNum) ->
+                    new PaymentResponse(
+                            rs.getString("payment_id"),
+                            rs.getString("status"),
+                            "Duplicate request already processed"
+                    ),
+            idempotencyKey
+    );
+}
+
 }

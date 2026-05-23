@@ -6,9 +6,14 @@ import com.ecommerce.productorder.order.dto.OrderRequest;
 import com.ecommerce.productorder.order.dto.OrderResponse;
 import com.ecommerce.productorder.order.model.OrderStatus;
 import com.ecommerce.productorder.order.service.OrderService;
+
+import io.swagger.v3.oas.annotations.Operation;
+
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+
+
 
 @RestController
 
@@ -26,28 +31,41 @@ public class OrderController {
 
     }
 
-    @PostMapping("/create")
+    @Operation(summary = "Create order")
+  @PostMapping("/create")
+public ApiResponse<OrderResponse> create(
+        @RequestBody OrderRequest request) {
 
-    public ApiResponse<OrderResponse> create(@RequestBody OrderRequest request) {
+    OrderResponse response =
+            service.createOrder(request);
+
+    if ("CONFIRMED".equals(response.getStatus())) {
 
         return ApiResponse.success(
                 "Order placed successfully",
-                service.createOrder(request)
-        );
-
-    }
-
-    @PatchMapping("/{orderId}/status")
-
-    public ApiResponse<OrderResponse> updateStatus(@PathVariable String orderId,
-                                                   @RequestParam OrderStatus status) {
-
-        return ApiResponse.success(
-                "Order status updated successfully",
-                service.updateStatus(orderId, status)
+                response
         );
     }
 
+    return ApiResponse.failure(
+            response.getMessage()
+    );
+}
+@Operation(summary = "Update order status")
+@PatchMapping("/{orderId}/status")
+public ApiResponse<OrderResponse> updateStatus(
+        @PathVariable String orderId,
+        @RequestParam OrderStatus status) {
+
+    OrderResponse response =
+            service.updateStatus(orderId, status);
+
+    return ApiResponse.<OrderResponse>success(
+            "Order status updated successfully",
+            response
+    );
+}
+        @Operation(summary = "Cancel order")
     @PatchMapping("/{orderId}/cancel")
 
     public ApiResponse<OrderResponse> cancel(@PathVariable String orderId) {
@@ -58,6 +76,7 @@ public class OrderController {
         );
     }
 
+    @Operation(summary = "Get order history by user")
     @GetMapping("/history/{userId}")
 
     public ApiResponse<List<OrderHistoryResponse>> history(@PathVariable String userId) {

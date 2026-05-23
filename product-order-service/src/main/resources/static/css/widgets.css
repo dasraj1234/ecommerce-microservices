@@ -1,0 +1,59 @@
+.topbar{
+
+    background:white;
+
+    border-radius:15px;
+
+    padding:20px;
+
+    box-shadow:
+            0 4px 20px rgba(0,0,0,.08);
+
+    margin-bottom:25px;
+}
+
+.cards{
+
+    display:grid;
+
+    grid-template-columns:
+            repeat(auto-fit,minmax(220px,1fr));
+
+    gap:20px;
+}
+
+.card{
+
+    background:white;
+
+    border-radius:15px;
+
+    padding:25px;
+
+    box-shadow:
+            0 4px 20px rgba(0,0,0,.08);
+}
+
+.metric{
+
+    font-size:35px;
+
+    font-weight:bold;
+
+    color:var(--orange);
+}
+
+.console{
+
+    background:#0d1117;
+
+    color:#22C55E;
+
+    border-radius:15px;
+
+    padding:20px;
+
+    font-family:Consolas,monospace;
+
+    margin-top:25px;
+}

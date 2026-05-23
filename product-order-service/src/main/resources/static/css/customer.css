@@ -1,0 +1,100 @@
+.product-grid{
+
+    display:grid;
+
+    grid-template-columns:
+            repeat(auto-fill,minmax(280px,1fr));
+
+    gap:25px;
+}
+
+.product-card{
+
+    background:white;
+
+    border-radius:15px;
+
+    overflow:hidden;
+
+    box-shadow:
+            0 4px 15px rgba(0,0,0,.08);
+
+    transition:.3s;
+}
+
+.product-card:hover{
+
+    transform:translateY(-5px);
+}
+
+.product-header{
+
+    background:#0B2447;
+
+    color:white;
+
+    padding:15px;
+}
+
+.product-body{
+
+    padding:20px;
+}
+
+.price{
+
+    color:#FF8C32;
+
+    font-size:28px;
+
+    font-weight:bold;
+}
+
+.stock{
+
+    color:#22C55E;
+
+    font-weight:bold;
+}
+
+.buy-btn{
+
+    width:100%;
+
+    margin-top:15px;
+
+    padding:12px;
+
+    border:none;
+
+    border-radius:10px;
+
+    background:#FF8C32;
+
+    color:white;
+
+    cursor:pointer;
+}
+
+.wallet-card{
+
+    background:white;
+
+    padding:30px;
+
+    border-radius:15px;
+
+    text-align:center;
+
+    box-shadow:
+            0 4px 15px rgba(0,0,0,.08);
+}
+
+.balance{
+
+    font-size:45px;
+
+    font-weight:bold;
+
+    color:#22C55E;
+}
