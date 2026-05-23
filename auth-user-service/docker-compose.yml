@@ -1,16 +1,16 @@
 services:
-  postgres:
-    image: postgres:15
+  mysql:
+    image: mysql:8
     environment:
-      POSTGRES_DB: mydb
-      POSTGRES_USER: myuser
-      POSTGRES_PASSWORD: mypassword
-      TZ: Asia/Kolkata       
-      PGTZ: Asia/Kolkata
+      MYSQL_DATABASE: mydb
+      MYSQL_USER: myuser
+      MYSQL_PASSWORD: mypassword
+      MYSQL_ROOT_PASSWORD: rootpassword
+      TZ: Asia/Kolkata
     ports:
-      - "5432:5432"
+      - "3306:3306"
     volumes:
-      - pgdata:/var/lib/postgresql/data
+      - mysqldata:/var/lib/mysql
 
 volumes:
-  pgdata:
+  mysqldata:
