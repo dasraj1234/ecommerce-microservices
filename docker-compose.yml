@@ -1,0 +1,17 @@
+services:
+  mysql:
+    image: mysql:8
+    environment:
+      MYSQL_DATABASE: ecommerce_db
+      MYSQL_USER: myuser
+      MYSQL_PASSWORD: mypassword
+      MYSQL_ROOT_PASSWORD: rootpassword
+      TZ: Asia/Kolkata
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysqldata:/var/lib/mysql
+      - ./ecommerce_db.sql:/docker-entrypoint-initdb.d/ecommerce_db.sql
+
+volumes:
+  mysqldata:
