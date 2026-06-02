@@ -2,7 +2,7 @@ package com.MCA.authN_Z.security;
 
 import java.util.Collection;
 
-import org.jspecify.annotations.Nullable;
+//import org.jspecify.annotations.Nullable;  //commented by arka
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -21,7 +21,7 @@ public class CustomUserDetails implements UserDetails{
     }
 
     @Override
-    public @Nullable String getPassword() {
+    public String getPassword() { //removed @Nullable
         return user.getPassword();
     }
 

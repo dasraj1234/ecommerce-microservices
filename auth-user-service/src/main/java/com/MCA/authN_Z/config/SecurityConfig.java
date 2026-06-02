@@ -43,12 +43,28 @@ public class SecurityConfig {
             .formLogin(form -> form.disable())
             .httpBasic(basic -> basic.disable())
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/users/register").permitAll()
-                .requestMatchers("/auth/**").permitAll()
-                .requestMatchers("/users/all").hasRole("ADMIN")
-                .requestMatchers("/users/**").authenticated()
-                .anyRequest().authenticated()
-            )
+
+    .requestMatchers(
+        "/users/register",
+        "/auth/**",
+
+        "/swagger-ui/**",
+        "/swagger-ui.html",
+        "/v3/api-docs/**",
+        "/v3/api-docs",
+
+        "/actuator/**"
+    ).permitAll()
+
+    .requestMatchers("/users/all")
+    .hasRole("ADMIN")
+
+    .requestMatchers("/users/**")
+    .authenticated()
+
+    .anyRequest()
+    .authenticated()
+)
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
             .exceptionHandling(ex -> ex.authenticationEntryPoint(jwtAuthEntryPoint));
@@ -70,14 +86,34 @@ public class SecurityConfig {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);
         return source;
-    }
+        }
 
-    @Bean
-    public AuthenticationProvider authenticationProvider() {
-        DaoAuthenticationProvider provider = new DaoAuthenticationProvider(userDetailsService);
-        provider.setPasswordEncoder(passwordEncoder());
-        return provider;
-    }
+/* 
+@Bean
+public AuthenticationProvider authenticationProvider() {
+    DaoAuthenticationProvider provider =
+            new DaoAuthenticationProvider(userDetailsService);
+    provider.setPasswordEncoder(passwordEncoder());
+    return provider;
+}
+*/
+
+   @Bean
+public AuthenticationProvider authenticationProvider() {   //updated by arka
+
+    DaoAuthenticationProvider provider =
+            new DaoAuthenticationProvider();
+
+    provider.setUserDetailsService(
+            userDetailsService
+    );
+
+    provider.setPasswordEncoder(
+            passwordEncoder()
+    );
+
+    return provider;
+}
 
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
