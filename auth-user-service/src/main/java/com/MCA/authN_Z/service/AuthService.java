@@ -27,12 +27,12 @@ public class AuthService {
         );
         //System.out.println("Authentication result: " + authN.isAuthenticated());
         if (authN.isAuthenticated()) {
-            String token = jwtUtil.generateToken(request.getUsername());
-             String role = authN.getAuthorities()
+            String role = authN.getAuthorities()
                            .stream()
                            .findFirst()
                            .get()
                            .getAuthority();
+            String token = jwtUtil.generateToken(request.getUsername(), role);
             return new LoginResponse(
                 token,
                 request.getUsername(),

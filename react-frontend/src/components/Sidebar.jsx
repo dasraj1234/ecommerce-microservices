@@ -1,7 +1,14 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { clearSession } from "../auth/session";
 
 export default function Sidebar({ type }) {
+  const navigate = useNavigate();
   const admin = type === "admin";
+
+  const handleLogout = () => {
+    clearSession();
+    navigate("/", { replace: true });
+  };
   const items = admin
     ? [
         ["/admin/dashboard", "📊 Dashboard"],
@@ -26,7 +33,9 @@ export default function Sidebar({ type }) {
         </Link>
       ))}
       <hr />
-      <Link to="/">🚪 Exit Portal</Link>
+      <a href="/" onClick={(e) => { e.preventDefault(); handleLogout(); }}>
+        🚪 Logout
+      </a>
     </div>
   );
 }

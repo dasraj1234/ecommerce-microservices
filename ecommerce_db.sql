@@ -186,10 +186,59 @@ CREATE TABLE `products` (
 --
 
 INSERT INTO `products` (`product_id`, `product_name`, `category`, `price`, `stock`, `status`, `created_date`, `updated_date`) VALUES
-('PROD-fdb8f87d', 'iPhone 16', 'Mobile', 5000.00, 11, 'ACTIVE', '2026-05-23 05:39:33', '2026-05-23 11:35:15');
+('PROD-fdb8f87d', 'iPhone 16', 'Mobile', 5000.00, 11, 'ACTIVE', '2026-05-23 05:39:33', '2026-05-23 11:35:15'),
+('PROD-1002', 'Samsung Galaxy S24', 'Mobile', 4500.00, 25, 'ACTIVE', '2026-05-24 07:00:00', '2026-05-24 07:00:00'),
+('PROD-1003', 'Google Pixel 9', 'Mobile', 4000.00, 18, 'ACTIVE', '2026-05-24 07:00:00', '2026-05-24 07:00:00'),
+('PROD-1004', 'OnePlus 12', 'Mobile', 3800.00, 20, 'ACTIVE', '2026-05-24 07:00:00', '2026-05-24 07:00:00'),
+('PROD-1005', 'MacBook Pro 14', 'Laptop', 12000.00, 8, 'ACTIVE', '2026-05-24 07:00:00', '2026-05-24 07:00:00'),
+('PROD-1006', 'Dell XPS 15', 'Laptop', 9500.00, 10, 'ACTIVE', '2026-05-24 07:00:00', '2026-05-24 07:00:00'),
+('PROD-1007', 'HP Spectre x360', 'Laptop', 8800.00, 12, 'ACTIVE', '2026-05-24 07:00:00', '2026-05-24 07:00:00'),
+('PROD-1008', 'Lenovo ThinkPad X1', 'Laptop', 9000.00, 9, 'ACTIVE', '2026-05-24 07:00:00', '2026-05-24 07:00:00'),
+('PROD-1009', 'iPad Air', 'Tablet', 3500.00, 15, 'ACTIVE', '2026-05-24 07:00:00', '2026-05-24 07:00:00'),
+('PROD-1010', 'Samsung Galaxy Tab S9', 'Tablet', 3200.00, 14, 'ACTIVE', '2026-05-24 07:00:00', '2026-05-24 07:00:00'),
+('PROD-1011', 'Sony WH-1000XM5', 'Audio', 1500.00, 30, 'ACTIVE', '2026-05-24 07:00:00', '2026-05-24 07:00:00'),
+('PROD-1012', 'AirPods Pro 2', 'Audio', 1200.00, 40, 'ACTIVE', '2026-05-24 07:00:00', '2026-05-24 07:00:00'),
+('PROD-1013', 'JBL Flip 6', 'Audio', 600.00, 50, 'ACTIVE', '2026-05-24 07:00:00', '2026-05-24 07:00:00'),
+('PROD-1014', 'Apple Watch Series 10', 'Wearable', 2000.00, 22, 'ACTIVE', '2026-05-24 07:00:00', '2026-05-24 07:00:00'),
+('PROD-1015', 'Samsung Galaxy Watch 7', 'Wearable', 1800.00, 19, 'ACTIVE', '2026-05-24 07:00:00', '2026-05-24 07:00:00'),
+('PROD-1016', 'Fitbit Charge 6', 'Wearable', 900.00, 35, 'ACTIVE', '2026-05-24 07:00:00', '2026-05-24 07:00:00'),
+('PROD-1017', 'Logitech MX Master 3S', 'Accessories', 400.00, 60, 'ACTIVE', '2026-05-24 07:00:00', '2026-05-24 07:00:00'),
+('PROD-1018', 'Keychron K2 Keyboard', 'Accessories', 500.00, 45, 'ACTIVE', '2026-05-24 07:00:00', '2026-05-24 07:00:00'),
+('PROD-1019', 'Anker Power Bank 20000', 'Accessories', 350.00, 70, 'ACTIVE', '2026-05-24 07:00:00', '2026-05-24 07:00:00'),
+('PROD-1020', 'Samsung 4K Monitor 27', 'Electronics', 2500.00, 16, 'ACTIVE', '2026-05-24 07:00:00', '2026-05-24 07:00:00');
 
 -- --------------------------------------------------------
 
+--
+-- Table structure for table `users`  (owned by auth-user-service)
+--
+
+CREATE TABLE `users` (
+  `id` varchar(36) NOT NULL,
+  `username` varchar(255) DEFAULT NULL,
+  `password` varchar(255) DEFAULT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  `role` varchar(255) DEFAULT NULL,
+  `created_at` date DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `users`
+-- Passwords are BCrypt hashes. Plaintext logins (username / password):
+--   admin / MYADMIN, user1 / MYUSER1, user2 / MYUSER2, ... user8 / MYUSER8
+--
+
+INSERT INTO `users` (`id`, `username`, `password`, `email`, `role`, `created_at`) VALUES
+('a0000000-0000-4000-8000-000000000001', 'admin', '$2b$12$3guzRwAiSqAXK9hMCxjuxu6FhwS20CS0KwOMUgeZ0rwXgHyX9fYdW', 'admin@shop.com', 'ADMIN', '2026-05-24'),
+('a0000000-0000-4000-8000-000000000002', 'user1', '$2b$12$EM6VYlnqLtgHK5ZVpY/7jOYTJ2mCnYu20e5gfzG/rxqVq/WYIfpH.', 'user1@shop.com', 'USER', '2026-05-24'),
+('a0000000-0000-4000-8000-000000000003', 'user2', '$2b$12$WOOZZI.SH9LLoR7NjhwskeFD/xUpwS9Tkg5QI94YG.wbiIq38zlLS', 'user2@shop.com', 'USER', '2026-05-24'),
+('a0000000-0000-4000-8000-000000000004', 'user3', '$2b$12$49uw00DDtlrzo57zkdoL5e3cRcNGLwXT2LmQHD/Ltnbkmna7B7Mwu', 'user3@shop.com', 'USER', '2026-05-24'),
+('a0000000-0000-4000-8000-000000000005', 'user4', '$2b$12$Xp0oDAlY4ER8Ia7x1A2iqOMKuNlPDIuDNVBfqT8rzTnS5/yws.wRS', 'user4@shop.com', 'USER', '2026-05-24'),
+('a0000000-0000-4000-8000-000000000006', 'user5', '$2b$12$xHIQkvv3alMLGES51.5NfO7Ga4A9ArS1cf7w.SLVYkkJd5apbXcTS', 'user5@shop.com', 'USER', '2026-05-24'),
+('a0000000-0000-4000-8000-000000000007', 'user6', '$2b$12$1LUfSUkNxU6wIVmsabRsg.12vO4g/ZNXPUfMb.GKDmM5KlPiBRdMC', 'user6@shop.com', 'USER', '2026-05-24'),
+('a0000000-0000-4000-8000-000000000008', 'user7', '$2b$12$jo0ay07UbrPMv63P6CxYL.loz./hHPb0/RDth2/2/5bkKR2oy2K1i', 'user7@shop.com', 'USER', '2026-05-24'),
+('a0000000-0000-4000-8000-000000000009', 'user8', '$2b$12$ZGZdBsWOSA54Jd.a176DV.MErAG2zR6y0c/LKplxfzTRxyaahhIMO', 'user8@shop.com', 'USER', '2026-05-24');
 --
 -- Table structure for table `transactions`
 --
