@@ -47,7 +47,7 @@ public class SecurityConfig {
     .requestMatchers(
         "/users/register",
         "/auth/**",
-
+        "/users/test",  //added to test api gateway
         "/swagger-ui/**",
         "/swagger-ui.html",
         "/v3/api-docs/**",
