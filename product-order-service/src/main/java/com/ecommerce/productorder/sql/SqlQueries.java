@@ -52,7 +52,7 @@ public class SqlQueries {
 
     public static final String FIND_ORDER_HISTORY =
 
-            "SELECT order_id,user_id,total_amount,status,created_date,updated_date "
+            "SELECT order_id,user_id,total_amount,status,payment_id,created_date,updated_date "
                     + "FROM orders WHERE user_id=? ORDER BY created_date DESC";
 
     public static final String INSERT_ORDER_LOG =

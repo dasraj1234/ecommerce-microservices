@@ -1,3 +1,4 @@
+/* 
 package com.ecommerce.paymentwallet.config;
 
 import org.springframework.context.annotation.Configuration;
@@ -24,3 +25,4 @@ public class WebConfig
                 );
     }
 }
+    */

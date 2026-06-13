@@ -8,6 +8,24 @@ import org.springframework.stereotype.Repository;
 public class InventoryRepository {
 
     private final JdbcTemplate jdbcTemplate;
+//razorpay integration 12th june
+    public Integer getStock(
+        String productId) {
+
+    return jdbcTemplate.queryForObject(
+
+        """
+        SELECT stock
+        FROM products
+        WHERE product_id = ?
+        """,
+
+        Integer.class,
+
+        productId
+    );
+}
+//razorpay integration 12th june
 
     public InventoryRepository(JdbcTemplate jdbcTemplate) {
 

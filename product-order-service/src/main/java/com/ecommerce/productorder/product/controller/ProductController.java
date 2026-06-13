@@ -44,4 +44,14 @@ public class ProductController {
                 service.search(name, category, maxPrice)
         );
     }
+//improvements 14th june
+    @Operation(summary = "Get all products")
+@GetMapping
+public ApiResponse<List<ProductResponse>> getAllProducts() {
+
+    return ApiResponse.success(
+            "Products fetched successfully",
+            service.search(null, null, null)
+    );
+}
 }

@@ -63,19 +63,27 @@ public class OrderService {
     //@Transactional
     public OrderResponse createOrder(OrderRequest request) {
 
-    LOGGER.info("Creating order for user {}", request.getUserId());
+      LOGGER.info(
+            "USER ID RECEIVED = {}",
+            request.getUserId()
+    );
 
-    boolean stockUpdated =
-            inventoryRepository.reduceStock(
-                    request.getProductId(),
-                    request.getQuantity()
-            );
+    LOGGER.info(
+            "PAYMENT METHOD RECEIVED = {}",
+            request.getPaymentMethod()
+    );
 
-    if (!stockUpdated) {
-        throw new InsufficientStockException(
-                request.getProductId()
-        );
-    }
+    LOGGER.info(
+            "Creating order for user {}",
+            request.getUserId()
+    );
+
+    LOGGER.info(
+        "PRODUCT ID RECEIVED = {}",
+        request.getProductId()
+);
+
+
 
     String orderId =
             idGenerator.generateOrderId();
@@ -84,10 +92,12 @@ public class OrderService {
             idGenerator.generateIdempotencyKey();
 
     orderRepository.createOrder(
+        
             orderId,
             request,
             idempotencyKey
     );
+    
 
     orderRepository.updateOrderStatus(
             orderId,
@@ -101,6 +111,63 @@ public class OrderService {
             request.getTotalAmount(),
             request.getTotalAmount()
     );
+
+
+    if ("RAZORPAY".equalsIgnoreCase(
+        request.getPaymentMethod())) {
+
+
+                LOGGER.info(
+    "PAYMENT METHOD RECEIVED = {}",
+    request.getPaymentMethod()
+);
+
+ boolean stockUpdated =
+            inventoryRepository.reduceStock(
+                    request.getProductId(),
+                    request.getQuantity()
+            );
+
+    orderRepository.updateOrderStatus(
+        orderId,
+        OrderStatus.CONFIRMED.name()
+);
+
+ if (!stockUpdated) {
+        throw new InsufficientStockException(
+                request.getProductId()
+        );
+    }
+
+LOGGER.info(
+    "PAYMENT ID RECEIVED = {}",
+    request.getPaymentId()
+);
+
+orderRepository.updatePaymentId(
+        orderId,
+        request.getPaymentId()
+);
+
+    LOGGER.info(
+            "Order {} confirmed via Razorpay",
+            orderId
+    );
+
+    OrderResponse response =
+            new OrderResponse();
+
+    response.setOrderId(orderId);
+    response.setStatus(
+            OrderStatus.CONFIRMED.name()
+    );
+    response.setMessage(
+            "Order placed successfully"
+    );
+
+    return response;
+}
+
 
     PaymentRequest paymentRequest =
             new PaymentRequest();
@@ -222,7 +289,20 @@ public class OrderService {
     return response;
 }
 }
+//razorpay integration 12th june
+public boolean hasStock(
+        String productId,
+        Integer quantity) {
 
+    Integer stock =
+            inventoryRepository
+                    .getStock(productId);
+
+    return stock != null
+            && stock >= quantity;
+}
+
+//razorpay integration 12th june
     @Transactional
     public OrderResponse cancelOrder(String orderId) {
 

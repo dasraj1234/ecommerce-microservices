@@ -98,3 +98,19 @@
 
     color:#22C55E;
 }
+/*//improvements 14th june*/
+
+.success-card {
+
+    border: 1px solid #28a745;
+
+    background: #f0fff4;
+
+    padding: 15px;
+
+    border-radius: 8px;
+
+    margin-top: 10px;
+
+    width: 350px;
+}
