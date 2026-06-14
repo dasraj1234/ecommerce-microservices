@@ -16,15 +16,24 @@ import com.MCA.authN_Z.service.UserService;
 
 @RestController
 @RequestMapping("/users")
+
+
 public class UserController {
     @Autowired
-    private  UserService userService;
 
+     @GetMapping("/test")
+    public String test() {
+        return "Auth Service Running";
+    }
+
+    private  UserService userService;
     @PostMapping("/register")
     public User register(@RequestBody RegisterRequest request) {
         // Implement registration logic here
         return userService.register(request);
     }
+
+    
 
     @GetMapping("/{id}")
     public User getUserById(@PathVariable UUID id) {
@@ -44,3 +53,5 @@ public class UserController {
         return userService.getAllUsers();
     }
 }
+
+
