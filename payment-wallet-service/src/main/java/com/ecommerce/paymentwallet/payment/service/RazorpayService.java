@@ -15,9 +15,14 @@ import org.springframework.stereotype.Service;
 
 import com.ecommerce.paymentwallet.payment.repository.PaymentRepository; //added for verify payment api - razorpay integration 12th june
 import com.ecommerce.paymentwallet.common.util.IdGenerator; //added for verify payment api - razorpay integration 12th june
+import com.ecommerce.paymentwallet.notification.dto.CustomerContact;
+import com.ecommerce.paymentwallet.notification.service.CustomerContactService;
+import com.ecommerce.paymentwallet.notification.service.NotificationService;
 import com.razorpay.Utils; //added for verify payment api - razorpay integration 12th june
 import com.ecommerce.paymentwallet.payment.dto.RazorpayVerifyRequest; //added for verify payment api - razorpay integration 
 // 12th june
+
+
 
 @Service
 @RequiredArgsConstructor
@@ -29,6 +34,9 @@ public class RazorpayService {
 
     private final IdGenerator idGenerator;
 
+    private final CustomerContactService customerContactService;
+
+private final NotificationService notificationService;
 
     
     @Value("${razorpay.key.id}")
@@ -167,23 +175,70 @@ if (verified) {
                 paymentId
         );
 
-        paymentRepository.saveRazorpayPayment(
+    paymentRepository.saveRazorpayPayment(
 
+        paymentId,
+        request.getOrderId(),
+        request.getUserId(),
+        request.getAmount(),
+        request.getIdempotencyKey(),
+        request.getRazorpayOrderId(),
+        request.getRazorpayPaymentId(),
+        request.getRazorpaySignature()
+);
+
+System.out.println(
+        "PAYMENT SAVED TO DB"
+);
+
+try {
+
+      System.out.println("BEFORE CUSTOMER LOOKUP");
+
+    new Thread(() -> {
+
+    try {
+
+        CustomerContact customer =
+                customerContactService.findByUserId(
+                        request.getUserId()
+                );
+
+        notificationService.sendPaymentSuccessMail(
+                customer.getEmail(),
+                customer.getCustomerName(),
                 paymentId,
-                request.getOrderId(),
-                request.getUserId(),
-                request.getAmount(),
-                request.getIdempotencyKey(),
-                request.getRazorpayOrderId(),
-                request.getRazorpayPaymentId(),
-                request.getRazorpaySignature()
+                request.getAmount()
         );
 
-        System.out.println(
-                "PAYMENT SAVED TO DB"
-        );
+        System.out.println("EMAIL SENT");
 
-        return paymentId;   // IMPORTANT
+    } catch (Exception ex) {
+
+        System.out.println("EMAIL FAILED");
+
+        ex.printStackTrace();
+    }
+
+}).start();
+
+
+    System.out.println(
+            "EMAIL SENT"  //email smtp implemented.
+
+    );
+
+} catch (Exception ex) {
+
+    System.out.println(
+            "EMAIL FAILED"   //email smtp implemented.
+
+    );
+
+    ex.printStackTrace();
+}
+
+return paymentId;   // IMPORTANT
 
     } catch (Exception ex) {
 

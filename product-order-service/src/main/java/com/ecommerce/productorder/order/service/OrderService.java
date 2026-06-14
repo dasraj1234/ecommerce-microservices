@@ -23,10 +23,15 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Value;
+
 @Service
 public class OrderService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(OrderService.class);
+
+    @Value("${wallet.mock.enabled:false}")
+        private boolean mockWallet;
 
     private OrderRepository orderRepository;
 
@@ -58,6 +63,8 @@ public class OrderService {
         this.paymentClient = paymentClient;
 
         this.idGenerator = idGenerator;
+
+                                
     }
 
     //@Transactional
@@ -190,10 +197,38 @@ orderRepository.updatePaymentId(
 
     try {
 
-        PaymentResponse paymentResponse =
-                paymentClient.processPayment(
-                        paymentRequest
-                );
+       PaymentResponse paymentResponse;   //@raj please change to original wallet code after doing your wallet service code
+
+if(mockWallet){     
+
+    paymentResponse =
+            new PaymentResponse();
+
+    paymentResponse.setPaymentId(
+            "P-MOCK-" +
+            System.currentTimeMillis()
+    );
+
+    paymentResponse.setStatus(
+            "SUCCESS"
+    );
+
+    paymentResponse.setMessage(
+            "Mock wallet payment success"
+    );
+
+    LOGGER.info(
+            "MOCK WALLET PAYMENT USED"
+    );
+
+}else{
+
+    paymentResponse =
+            paymentClient.processPayment(  //@raj please change to original wallet code after doing your wallet service code
+
+                    paymentRequest
+            );
+}
 
         if ("SUCCESS".equals(
                 paymentResponse.getStatus())) {

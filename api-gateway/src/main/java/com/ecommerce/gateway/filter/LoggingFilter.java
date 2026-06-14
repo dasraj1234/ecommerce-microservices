@@ -1,6 +1,6 @@
 //improvements 14th june
 
-package com.ecommerce.gateway;
+package com.ecommerce.gateway.filter;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

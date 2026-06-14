@@ -52,6 +52,7 @@ public PaymentDetailsResponse getPayment(
 }
 
 @Operation(summary = "Get payment history by user")
+@CrossOrigin(origins = "http://localhost:8082")
 @GetMapping("/user/{userId}")
 public List<PaymentDetailsResponse> getPaymentsByUser(
         @PathVariable String userId) {

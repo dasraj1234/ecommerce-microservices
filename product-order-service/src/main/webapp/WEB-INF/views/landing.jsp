@@ -103,6 +103,7 @@ Loading Services...
 
 </div>
 
+
 <div class="portal-grid">
 
 <div class="portal-card">
@@ -144,8 +145,7 @@ Enter
 </div>
 
 </div>
-
-<script src="/js/dashboard.js"></script>
+<script src="/js/service-status.js"></script>
 
 </body>
 
