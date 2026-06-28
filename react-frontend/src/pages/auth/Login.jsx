@@ -4,7 +4,7 @@ import { login } from "../../api/auth";
 import { setSession, homeForRole } from "../../auth/session";
 
 // Login form.
-// Backend: POST /auth/login  (auth-user-service @ :8083)
+// Backend: POST /auth/login  (auth-user-service @ :8081, via Vite proxy)
 //   request : { username, password }
 //   response: { token, username, role }
 export default function Login() {

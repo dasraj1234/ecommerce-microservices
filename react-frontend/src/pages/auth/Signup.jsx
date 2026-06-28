@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { register } from "../../api/auth";
 
 // Signup form.
-// Backend: POST /users/register  (auth-user-service @ :8083)
+// Backend: POST /users/register  (auth-user-service @ :8081, via Vite proxy)
 //   request : { username, email, password }
 //   response: created User { id, username, email, role, createdAt }
 export default function Signup() {
