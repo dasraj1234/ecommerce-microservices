@@ -1,17 +1,24 @@
 services:
   mysql:
     image: mysql:8
+    container_name: ecom-mysql
     environment:
       MYSQL_DATABASE: ecommerce_db
-      MYSQL_USER: myuser
-      MYSQL_PASSWORD: mypassword
+      MYSQL_USER: myuser            # matches application-dev.properties
+      MYSQL_PASSWORD: mypassword    # matches application-dev.properties
       MYSQL_ROOT_PASSWORD: rootpassword
       TZ: Asia/Kolkata
     ports:
       - "3306:3306"
     volumes:
       - mysqldata:/var/lib/mysql
+      # Auto-runs on FIRST init only (when the data volume is empty).
       - ./ecommerce_db.sql:/docker-entrypoint-initdb.d/ecommerce_db.sql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-prootpassword"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
 volumes:
   mysqldata:

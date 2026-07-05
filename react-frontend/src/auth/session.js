@@ -93,3 +93,9 @@ export function isAuthenticated() {
 export function homeForRole(role) {
   return role === "ADMIN" ? "/admin/dashboard" : "/customer/home";
 }
+
+// Route prefix a given role is allowed to view. Used to decide whether a
+// remembered "from" path is appropriate for the user who just logged in.
+export function roleAreaPrefix(role) {
+  return role === "ADMIN" ? "/admin" : "/customer";
+}

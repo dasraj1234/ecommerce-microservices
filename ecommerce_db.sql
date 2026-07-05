@@ -124,6 +124,9 @@ CREATE TABLE `payments` (
   `amount` decimal(12,2) NOT NULL,
   `status` varchar(30) NOT NULL,
   `idempotency_key` varchar(100) DEFAULT NULL,
+  `razorpay_order_id` varchar(80) DEFAULT NULL,
+  `razorpay_payment_id` varchar(80) DEFAULT NULL,
+  `razorpay_signature` varchar(255) DEFAULT NULL,
   `created_date` timestamp NOT NULL DEFAULT current_timestamp(),
   `updated_date` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { login } from "../../api/auth";
-import { setSession, homeForRole } from "../../auth/session";
+import { setSession, homeForRole, roleAreaPrefix } from "../../auth/session";
 
 // Login form.
 // Backend: POST /auth/login  (auth-user-service @ :8081, via Vite proxy)
@@ -25,9 +25,14 @@ export default function Login() {
     try {
       const data = await login(form);
       setSession(data);
-      // Return to the page the guard redirected from, else the role's home.
+      // Return to the page the guard redirected from — but only if it belongs to
+      // this user's role area; otherwise a customer who hit an /admin route (or
+      // vice versa) would be sent to a page their role can't view. Fall back to
+      // the role's own home in that case.
       const from = location.state?.from?.pathname;
-      navigate(from || homeForRole(data.role), { replace: true });
+      const roleHome = homeForRole(data.role);
+      const dest = from && from.startsWith(roleAreaPrefix(data.role)) ? from : roleHome;
+      navigate(dest, { replace: true });
     } catch (err) {
       setError(err.message || "Login failed. Please try again.");
     } finally {

@@ -14,7 +14,7 @@ export default defineConfig({
       "/products": "http://localhost:8082",
       "/orders": "http://localhost:8082",
       "/payments": "http://localhost:8083",
-      "/wallets": "http://localhost:8083",
+      "/wallet": "http://localhost:8083",
     },
   },
 });

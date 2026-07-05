@@ -19,14 +19,15 @@ import com.MCA.authN_Z.service.UserService;
 
 
 public class UserController {
-    @Autowired
 
-     @GetMapping("/test")
+    @GetMapping("/test")
     public String test() {
         return "Auth Service Running";
     }
 
-    private  UserService userService;
+    @Autowired
+    private UserService userService;
+
     @PostMapping("/register")
     public User register(@RequestBody RegisterRequest request) {
         // Implement registration logic here
