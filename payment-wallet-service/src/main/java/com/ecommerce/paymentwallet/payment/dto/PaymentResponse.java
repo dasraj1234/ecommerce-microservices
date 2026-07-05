@@ -6,6 +6,8 @@ public class PaymentResponse {
     private String status;
     private String message;
 
+    
+
     public PaymentResponse() {
     }
 
@@ -28,15 +30,15 @@ public class PaymentResponse {
     public String getStatus() {
         return status;
     }
-
+//improvements 14th june
     public void setStatus(String status) {
         this.status = status;
     }
-
+//improvements 14th june
     public String getMessage() {
         return message;
     }
-
+//improvements 14th june
     public void setMessage(String message) {
         this.message = message;
     }

@@ -90,6 +90,7 @@
                 <th>User ID</th>
                 <th>Amount</th>
                 <th>Status</th>
+                <th>Payment ID</th>
 
             </tr>
 

@@ -25,6 +25,14 @@ href="/css/customer.css">
 
 <div class="main-content">
 
+<!--razorpay integration 12th june !-->
+<select id="paymentMethod">
+    <option value="RAZORPAY" selected>Razorpay</option>
+    <option value="WALLET">Wallet</option>
+</select>
+
+<br><br>
+
 <h1>
 Place Order
 </h1>
@@ -41,15 +49,20 @@ placeholder="USER-1001">
 
 <br><br>
 
+<div id="productNameDisplay">
+Product: Mobile Phone
+</div>
+
 <input
 id="productId"
-readonly
-placeholder="Product ID">
+type="hidden">
 
 <br><br>
 
 <input
 id="quantity"
+type="number"
+min="1"
 placeholder="Quantity">
 
 <br><br>
@@ -81,6 +94,7 @@ Ready
 </div>
 
 <script src="/js/customer-orders.js"></script>
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script> <!--razorpay integration frontend 12th june!-->
 
 </body>
 

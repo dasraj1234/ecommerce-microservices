@@ -20,6 +20,9 @@ public class OrderRepository {
 
     }
 
+
+ 
+
     public void createOrder(String orderId,
                             OrderRequest request,
                             String idempotencyKey) {
@@ -95,6 +98,7 @@ public class OrderRepository {
                     history.setUserId(rs.getString("user_id"));
                     history.setTotalAmount(rs.getDouble("total_amount"));
                     history.setStatus(rs.getString("status"));
+                    history.setPaymentId(rs.getString("payment_id"));  //improvements 14th june
                     history.setCreatedDate(rs.getTimestamp("created_date").toString());
                     history.setUpdatedDate(rs.getTimestamp("updated_date").toString());
                     return history;
@@ -103,4 +107,20 @@ public class OrderRepository {
                 userId
         );
     }
+
+    public int updatePaymentId(
+        String orderId,
+        String paymentId) {
+
+    String sql =
+        "UPDATE orders " +
+        "SET payment_id=? " +
+        "WHERE order_id=?";
+
+    return jdbcTemplate.update(
+            sql,
+            paymentId,
+            orderId
+    );
+}
 }

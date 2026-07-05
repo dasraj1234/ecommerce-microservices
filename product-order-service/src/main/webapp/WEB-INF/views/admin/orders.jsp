@@ -132,6 +132,8 @@
 
                 <th>Status</th>
 
+                <th>Payment ID</th>
+
                 <th>Created</th>
 
             </tr>
