@@ -86,4 +86,16 @@ public ApiResponse<OrderResponse> updateStatus(
                 service.history(userId)
         );
     }
+
+    //razorpay integration 12th june
+    @GetMapping("/stock/check")
+public boolean checkStock(
+        @RequestParam String productId,
+        @RequestParam Integer quantity) {
+
+    return service.hasStock(
+            productId,
+            quantity
+    );
+}
 }

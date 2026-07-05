@@ -31,7 +31,7 @@ async function createOrder() {
 
         const response =
             await fetch(
-                "/orders/create",
+                "${API_BASE_URL}/orders/create",
                 {
                     method: "POST",
                     headers: {
@@ -142,6 +142,8 @@ async function loadHistory() {
                     <td>${order.totalAmount}</td>
 
                     <td>${order.status}</td>
+
+                    <td>${order.paymentId || "-"}</td>
 
                     <td>${order.createdDate}</td>
 

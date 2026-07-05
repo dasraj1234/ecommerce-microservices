@@ -14,6 +14,8 @@ public class OrderHistoryResponse {
 
     private String updatedDate;
 
+    private String paymentId;
+
     public String getOrderId() {
         return orderId;
     }
@@ -60,5 +62,15 @@ public class OrderHistoryResponse {
 
     public void setUpdatedDate(String updatedDate) {
         this.updatedDate = updatedDate;
+    }
+
+    public String getPaymentId() {
+    return paymentId;
+}
+
+    public void setPaymentId(
+            String paymentId) {
+
+        this.paymentId = paymentId;
     }
 }

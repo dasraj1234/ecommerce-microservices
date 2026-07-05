@@ -23,10 +23,15 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Value;
+
 @Service
 public class OrderService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(OrderService.class);
+
+    @Value("${wallet.mock.enabled:false}")
+        private boolean mockWallet;
 
     private OrderRepository orderRepository;
 
@@ -58,24 +63,34 @@ public class OrderService {
         this.paymentClient = paymentClient;
 
         this.idGenerator = idGenerator;
+
+                                
     }
 
     //@Transactional
     public OrderResponse createOrder(OrderRequest request) {
 
-    LOGGER.info("Creating order for user {}", request.getUserId());
+      LOGGER.info(
+            "USER ID RECEIVED = {}",
+            request.getUserId()
+    );
 
-    boolean stockUpdated =
-            inventoryRepository.reduceStock(
-                    request.getProductId(),
-                    request.getQuantity()
-            );
+    LOGGER.info(
+            "PAYMENT METHOD RECEIVED = {}",
+            request.getPaymentMethod()
+    );
 
-    if (!stockUpdated) {
-        throw new InsufficientStockException(
-                request.getProductId()
-        );
-    }
+    LOGGER.info(
+            "Creating order for user {}",
+            request.getUserId()
+    );
+
+    LOGGER.info(
+        "PRODUCT ID RECEIVED = {}",
+        request.getProductId()
+);
+
+
 
     String orderId =
             idGenerator.generateOrderId();
@@ -84,10 +99,12 @@ public class OrderService {
             idGenerator.generateIdempotencyKey();
 
     orderRepository.createOrder(
+        
             orderId,
             request,
             idempotencyKey
     );
+    
 
     orderRepository.updateOrderStatus(
             orderId,
@@ -101,6 +118,63 @@ public class OrderService {
             request.getTotalAmount(),
             request.getTotalAmount()
     );
+
+
+    if ("RAZORPAY".equalsIgnoreCase(
+        request.getPaymentMethod())) {
+
+
+                LOGGER.info(
+    "PAYMENT METHOD RECEIVED = {}",
+    request.getPaymentMethod()
+);
+
+ boolean stockUpdated =
+            inventoryRepository.reduceStock(
+                    request.getProductId(),
+                    request.getQuantity()
+            );
+
+    orderRepository.updateOrderStatus(
+        orderId,
+        OrderStatus.CONFIRMED.name()
+);
+
+ if (!stockUpdated) {
+        throw new InsufficientStockException(
+                request.getProductId()
+        );
+    }
+
+LOGGER.info(
+    "PAYMENT ID RECEIVED = {}",
+    request.getPaymentId()
+);
+
+orderRepository.updatePaymentId(
+        orderId,
+        request.getPaymentId()
+);
+
+    LOGGER.info(
+            "Order {} confirmed via Razorpay",
+            orderId
+    );
+
+    OrderResponse response =
+            new OrderResponse();
+
+    response.setOrderId(orderId);
+    response.setStatus(
+            OrderStatus.CONFIRMED.name()
+    );
+    response.setMessage(
+            "Order placed successfully"
+    );
+
+    return response;
+}
+
 
     PaymentRequest paymentRequest =
             new PaymentRequest();
@@ -123,10 +197,38 @@ public class OrderService {
 
     try {
 
-        PaymentResponse paymentResponse =
-                paymentClient.processPayment(
-                        paymentRequest
-                );
+       PaymentResponse paymentResponse;   //@raj please change to original wallet code after doing your wallet service code
+
+if(mockWallet){     
+
+    paymentResponse =
+            new PaymentResponse();
+
+    paymentResponse.setPaymentId(
+            "P-MOCK-" +
+            System.currentTimeMillis()
+    );
+
+    paymentResponse.setStatus(
+            "SUCCESS"
+    );
+
+    paymentResponse.setMessage(
+            "Mock wallet payment success"
+    );
+
+    LOGGER.info(
+            "MOCK WALLET PAYMENT USED"
+    );
+
+}else{
+
+    paymentResponse =
+            paymentClient.processPayment(  //@raj please change to original wallet code after doing your wallet service code
+
+                    paymentRequest
+            );
+}
 
         if ("SUCCESS".equals(
                 paymentResponse.getStatus())) {
@@ -222,7 +324,20 @@ public class OrderService {
     return response;
 }
 }
+//razorpay integration 12th june
+public boolean hasStock(
+        String productId,
+        Integer quantity) {
 
+    Integer stock =
+            inventoryRepository
+                    .getStock(productId);
+
+    return stock != null
+            && stock >= quantity;
+}
+
+//razorpay integration 12th june
     @Transactional
     public OrderResponse cancelOrder(String orderId) {
 

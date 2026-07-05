@@ -146,4 +146,35 @@ public PaymentResponse findByIdempotencyKey(
     );
 }
 
+//razorpay integration 12th june
+public void saveRazorpayPayment(
+        String paymentId,
+        String orderId,
+        String userId,
+        Double amount,
+        String idempotency_key,
+        String razorpayOrderId,
+        String razorpayPaymentId,
+        String razorpaySignature) {
+
+    String sql =
+        "INSERT INTO payments " +
+        "(payment_id,order_id,user_id,amount,idempotency_key,status," +
+        "razorpay_order_id,razorpay_payment_id,razorpay_signature) " +
+        "VALUES (?,?,?,?,?,?,?,?,?)";
+
+   jdbcTemplate.update(
+    sql,
+    paymentId,
+    orderId,
+    userId,
+    amount,
+    idempotency_key,
+    "SUCCESS",
+    razorpayOrderId,
+    razorpayPaymentId,
+    razorpaySignature
+);
+}
+
 }
