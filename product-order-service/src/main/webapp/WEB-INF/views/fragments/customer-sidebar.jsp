@@ -1,24 +1,19 @@
-
 <div class="sidebar">
 
     <div class="logo">
         CUSTOMER
     </div>
 
-    <div class="menu-title">
-        Shopping
-    </div>
-
     <a href="/customer/home">
-        🛍 Shop
+        🏠 Home
     </a>
 
     <a href="/customer/orders">
-        📦 My Orders
+        📦 Orders
     </a>
 
     <a href="/customer/payments">
-        💳 My Payments
+        💳 Payments
     </a>
 
     <a href="/customer/wallet">
@@ -28,7 +23,7 @@
     <hr>
 
     <a href="/">
-        🚪 Exit Portal
+        🚪 Logout
     </a>
 
 </div>

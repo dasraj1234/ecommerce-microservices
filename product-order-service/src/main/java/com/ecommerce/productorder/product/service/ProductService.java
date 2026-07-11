@@ -26,8 +26,23 @@ public class ProductService {
 
     public String create(ProductRequest request) {
 
-        String productId =
-                idGenerator.generateProductId();
+        System.out.println(
+        "CATEGORY RECEIVED = "
+        + request.getCategoryCode()
+);
+        
+        Integer sequence =
+        repository.getNextSequence(
+                request.getCategoryCode()
+        );
+
+String productId =
+        idGenerator.generateProductId(
+
+                request.getCategoryCode(),
+
+                sequence
+        );
 
         repository.createProduct(productId, request);
 
@@ -40,4 +55,27 @@ public class ProductService {
 
         return repository.searchProducts(name, category, maxPrice);
     }
+
+public ProductResponse getProductById(
+        String productId) {
+
+    return repository.findById(productId);
+}
+
+public String deleteProduct(
+        String productId) {
+
+    int rows =
+            repository.deleteById(productId);
+
+    if(rows==0){
+
+        throw new IllegalArgumentException(
+                "Product not found"
+        );
+    }
+
+    return "Product deleted successfully";
+}
+
 }

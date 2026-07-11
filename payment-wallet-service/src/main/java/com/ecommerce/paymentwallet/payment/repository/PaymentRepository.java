@@ -6,6 +6,8 @@ import org.springframework.stereotype.Repository;
 import com.ecommerce.paymentwallet.payment.dto.PaymentDetailsResponse;
 import com.ecommerce.paymentwallet.payment.dto.PaymentResponse;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 @Repository
@@ -16,6 +18,40 @@ public class PaymentRepository {
     public PaymentRepository(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
+
+    private String formatDate(java.sql.Timestamp timestamp) {
+
+    LocalDateTime dateTime =
+            timestamp.toLocalDateTime();
+
+    int day = dateTime.getDayOfMonth();
+
+    String suffix;
+
+    if(day >= 11 && day <= 13){
+
+        suffix = "th";
+
+    } else {
+
+        switch(day % 10){
+
+            case 1: suffix = "st"; break;
+            case 2: suffix = "nd"; break;
+            case 3: suffix = "rd"; break;
+            default: suffix = "th";
+        }
+    }
+
+    return day
+            + suffix
+            + " "
+            + dateTime.format(
+                    DateTimeFormatter.ofPattern(
+                            "MMMM yyyy, hh:mm a"
+                    )
+            );
+}
 
 public void insert(String paymentId, String orderId, String userId,
                    double amount, String status, String idempotencyKey) {
@@ -86,6 +122,11 @@ public PaymentDetailsResponse findByPaymentId(
                 p.setStatus(
                         rs.getString("status"));
 
+p.setCreatedDate(
+        formatDate(
+                rs.getTimestamp("created_date")
+        )
+);
                 return p;
             },
             paymentId
@@ -120,6 +161,11 @@ public List<PaymentDetailsResponse> findByUserId(
                 p.setStatus(
                         rs.getString("status"));
 
+p.setCreatedDate(
+        formatDate(
+                rs.getTimestamp("created_date")
+        )
+);
                 return p;
             },
             userId

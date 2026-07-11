@@ -1,7 +1,11 @@
 package com.ecommerce.paymentwallet.common.exception;
 
 import org.springframework.web.bind.annotation.*;
-import org.springframework.dao.DataIntegrityViolationException; // 🔥 ADD THIS
+import org.springframework.dao.DataIntegrityViolationException; 
+
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.dao.EmptyResultDataAccessException;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -18,6 +22,17 @@ public class GlobalExceptionHandler {
 
         return res;
     }
+@ExceptionHandler(EmptyResultDataAccessException.class)
+public ResponseEntity<Map<String,Object>> handleEmptyResult(EmptyResultDataAccessException ex) {
+
+    Map<String,Object> res = new HashMap<>();
+    res.put("status","FAILED");
+    res.put("message","Payment not found");
+
+    return ResponseEntity
+            .status(HttpStatus.NOT_FOUND)
+            .body(res);
+}
 
     // 🔥 404 - Not Found
     @ExceptionHandler(ResourceNotFoundException.class)
@@ -55,6 +70,15 @@ public Map<String, Object> handleDB(DataIntegrityViolationException ex) {
 
     return res;
 }
+
+@ExceptionHandler(
+    org.springframework.web.servlet.resource.NoResourceFoundException.class
+)
+@ResponseStatus(HttpStatus.NOT_FOUND)
+public void ignoreFavicon() {
+}
+
+
 
 
 }

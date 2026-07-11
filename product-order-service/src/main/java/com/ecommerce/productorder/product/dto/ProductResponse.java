@@ -8,6 +8,10 @@ public class ProductResponse {
 
     private String category;
 
+    private String categoryPath;
+
+    private String categoryNamePath;
+
     private Double price;
 
     private Integer stock;
@@ -36,6 +40,22 @@ public class ProductResponse {
 
     public void setCategory(String category) {
         this.category = category;
+    }
+
+    public String getCategoryPath() {
+        return categoryPath;
+    }
+
+    public void setCategoryPath(String categoryPath) {
+        this.categoryPath = categoryPath;
+    }
+
+    public String getCategoryNamePath() {
+        return categoryNamePath;
+    }
+
+    public void setCategoryNamePath(String categoryNamePath) {
+        this.categoryNamePath = categoryNamePath;
     }
 
     public Double getPrice() {

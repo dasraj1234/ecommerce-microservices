@@ -4,7 +4,16 @@ public class SqlQueries {
 
     public static final String CREATE_PRODUCT =
 
-            "INSERT INTO products(product_id,product_name,category,price,stock,status) VALUES (?,?,?,?,?,?)";
+        "INSERT INTO products(" +
+        "product_id," +
+        "product_name," +
+        "category_code," +
+        "category_path," +
+        "category_name_path," +
+        "price," +
+        "stock," +
+        "status" +
+        ") VALUES (?,?,?,?,?,?,?,?)";
 
     public static final String GET_PRODUCTS =
 
@@ -12,11 +21,23 @@ public class SqlQueries {
 
     public static final String SEARCH_PRODUCTS =
 
-            "SELECT * FROM products WHERE status='ACTIVE' "
-                    + "AND (? IS NULL OR LOWER(product_name) LIKE LOWER(CONCAT('%', ?, '%'))) "
-                    + "AND (? IS NULL OR LOWER(category) = LOWER(?)) "
-                    + "AND (? IS NULL OR price <= ?) "
-                    + "ORDER BY product_name ASC";
+        "SELECT " +
+        "p.product_id, " +
+        "p.product_name, " +
+        "c.category_name AS category, " +
+        "p.category_path, " +
+        "p.category_name_path, " +
+        "p.price, " +
+        "p.stock, " +
+        "p.status " +
+        "FROM products p " +
+        "JOIN category_master c " +
+        "ON p.category_code = c.category_code " +
+        "WHERE p.status='ACTIVE' " +
+        "AND (? IS NULL OR LOWER(p.product_name) LIKE LOWER(CONCAT('%', ?, '%'))) " +
+        "AND (? IS NULL OR p.category_code = ?) " +
+        "AND (? IS NULL OR p.price <= ?) " +
+        "ORDER BY p.product_name ASC";
 
     public static final String REDUCE_STOCK =
 

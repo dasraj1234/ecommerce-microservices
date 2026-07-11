@@ -17,7 +17,7 @@
     </a>
 
     <a href="/admin/orders">
-        📑 Orders
+        📄 Orders
     </a>
 
     <a href="/admin/payments">

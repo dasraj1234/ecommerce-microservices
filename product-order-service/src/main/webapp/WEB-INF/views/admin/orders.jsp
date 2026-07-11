@@ -15,22 +15,7 @@
 </head>
 
 <body>
-
-<div class="sidebar">
-
-    <h2>E-Commerce</h2>
-
-    <a href="/">Dashboard</a>
-
-    <a href="/products-ui">Products</a>
-
-    <a href="/orders-ui">Orders</a>
-
-    <a href="/payments-ui">Payments</a>
-
-    <a href="/wallet-ui">Wallet</a>
-
-</div>
+<%@ include file="../fragments/admin-sidebar.jsp" %>
 
 <div class="main-content">
 
@@ -134,7 +119,7 @@
 
                 <th>Payment ID</th>
 
-                <th>Created</th>
+                <th>Order Date</th>
 
             </tr>
 
@@ -162,7 +147,9 @@
 
 </div>
 
-<script src="/js/orders.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script src="/js/admin-orders.js"></script>
 
 </body>
 

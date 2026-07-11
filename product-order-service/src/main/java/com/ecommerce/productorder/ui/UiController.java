@@ -11,6 +11,8 @@ public class UiController {
         return "landing";
     }
 
+    // ---------- ADMIN ----------
+
     @GetMapping("/admin/dashboard")
     public String adminDashboard() {
         return "admin/dashboard";
@@ -31,6 +33,8 @@ public class UiController {
         return "admin/payments";
     }
 
+    // ---------- CUSTOMER ----------
+
     @GetMapping("/customer/home")
     public String customerHome() {
         return "customer/home";
@@ -41,15 +45,13 @@ public class UiController {
         return "customer/orders";
     }
 
-    @GetMapping("/customer/wallet")
-    public String customerWallet() {
-        return "customer/wallet";
-    }
-
     @GetMapping("/customer/payments")
     public String customerPayments() {
         return "customer/payments";
     }
 
-    
+    @GetMapping("/customer/wallet")
+    public String customerWallet() {
+        return "customer/wallet";
+    }
 }

@@ -1,14 +1,30 @@
 package com.ecommerce.productorder.product.dto;
 
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+
 public class ProductRequest {
 
+     @NotBlank(message = "Product Name is required")
     private String productName;
 
-    private String category;
+    @NotBlank(message = "Category is required")
+    private String categoryCode;
 
+    @NotNull(message = "Price is required")
+    @Min(value = 1, message = "Price must be greater than 0")
     private Double price;
 
+    @NotNull(message = "Stock is required")
+    @Min(value = 1, message = "Stock must be greater than 0")
     private Integer stock;
+
+   
+    private String categoryPath;
+
+    private String categoryNamePath;
+
 
     public String getProductName() {
         return productName;
@@ -18,12 +34,28 @@ public class ProductRequest {
         this.productName = productName;
     }
 
-    public String getCategory() {
-        return category;
+    public String getCategoryCode() {
+        return categoryCode;
     }
 
-    public void setCategory(String category) {
-        this.category = category;
+    public void setCategoryCode(String categoryCode) {
+        this.categoryCode = categoryCode;
+    }
+
+    public String getCategoryPath() {
+        return categoryPath;
+    }
+
+    public void setCategoryPath(String categoryPath) {
+        this.categoryPath = categoryPath;
+    }
+
+    public String getCategoryNamePath() {
+        return categoryNamePath;
+    }
+
+    public void setCategoryNamePath(String categoryNamePath) {
+        this.categoryNamePath = categoryNamePath;
     }
 
     public Double getPrice() {

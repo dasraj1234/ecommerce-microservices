@@ -1,36 +1,56 @@
 package com.ecommerce.productorder.common.util;
 
+import com.ecommerce.productorder.common.repository.SequenceRepository;
 import org.springframework.stereotype.Component;
-
-import java.util.UUID;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 
 @Component
 public class IdGenerator {
 
+    private final SequenceRepository sequenceRepository;
+
+    public IdGenerator(SequenceRepository sequenceRepository) {
+        this.sequenceRepository = sequenceRepository;
+    }
+
+    public String generateProductId(
+
+        String categoryCode,
+
+        Integer sequence) {
+
+    return String.format(
+
+            "PRD%s%06d",
+
+            categoryCode,
+
+            sequence
+    );
+}
+
     public String generateOrderId() {
 
-        return "ORD-" +
-                UUID.randomUUID()
-                        .toString()
-                        .substring(0, 8);
+    int number =
+            sequenceRepository.getNextNumber("ORDER");
 
-    }
+    String date =
+            LocalDate.now()
+                    .format(
+                        DateTimeFormatter
+                                .ofPattern("yyyyMMdd")
+                    );
 
-    public String generateProductId() {
-
-        return "PROD-" +
-                UUID.randomUUID()
-                        .toString()
-                        .substring(0, 8);
-
-    }
+    return String.format(
+            "ORD%s%06d",
+            date,
+            number
+    );
+}
 
     public String generateIdempotencyKey() {
 
-        return "IDEMP-" +
-                UUID.randomUUID()
-                        .toString()
-                        .substring(0, 10);
-
+        return "IDEMP" + System.currentTimeMillis();
     }
 }

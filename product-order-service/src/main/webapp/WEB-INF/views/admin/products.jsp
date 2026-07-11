@@ -46,25 +46,62 @@ Create Product
 
 <input
 id="productName"
-placeholder="Product Name">
+placeholder="Product Name"
+required>
 
 <br><br>
 
-<input
-id="category"
-placeholder="Category">
+<label>Main Category</label>
+
+<select id="mainCategory" required>
+
+    <option value="">
+        Select Main Category
+    </option>
+
+</select>
+
+<br><br>
+
+<label>Category</label>
+
+<select id="subCategory" required>
+
+    <option value="">
+        Select Category
+    </option>
+
+</select>
+
+<br><br>
+
+<label>Sub Category</label>
+
+<select id="leafCategory" required>
+
+    <option value="">
+        Select Sub Category
+    </option>
+
+</select>
 
 <br><br>
 
 <input
 id="price"
-placeholder="Price">
+type="number"
+min="1"
+placeholder="Price"
+required>
 
 <br><br>
 
 <input
 id="stock"
-placeholder="Stock">
+type="number"
+min="1"
+placeholder="Stock"
+required>
 
 <br><br>
 
@@ -73,6 +110,42 @@ Create Product
 </button>
 
 </div>
+
+<div class="card">
+
+    <h3>Search Product</h3>
+
+    <input
+        id="searchProductId"
+        placeholder="Product ID">
+
+    <br><br>
+
+    <button onclick="searchProduct()">
+        Search Product
+    </button>
+
+</div>
+
+<br>
+
+<div class="card">
+
+    <h3>Delete Product</h3>
+
+    <input
+        id="deleteProductId"
+        placeholder="Product ID">
+
+    <br><br>
+
+    <button onclick="deleteProduct()">
+        Delete Product
+    </button>
+
+</div>
+
+<br>
 
 <br>
 
@@ -84,7 +157,7 @@ Product Catalog
 
 <br>
 
-<button onclick="loadProducts()">
+<button onclick="loadProducts(true)">
 Refresh Products
 </button>
 
@@ -96,11 +169,14 @@ Refresh Products
 
 <tr>
 
-<th>ID</th>
+<th>Product ID</th>
 <th>Name</th>
+<th>Main Category</th>
 <th>Category</th>
+<th>Sub Category</th>
 <th>Price</th>
 <th>Stock</th>
+
 
 </tr>
 
@@ -124,6 +200,8 @@ Admin Product Console
 
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="/js/admin-products.js"></script>
 <script src="/js/admin-products.js"></script>
 
 </body>

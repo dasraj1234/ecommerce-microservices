@@ -15,21 +15,7 @@
 
 <body>
 
-<div class="sidebar">
-
-    <h2>E-Commerce</h2>
-
-    <a href="/">Dashboard</a>
-
-    <a href="/products-ui">Products</a>
-
-    <a href="/orders-ui">Orders</a>
-
-    <a href="/payments-ui">Payments</a>
-
-    <a href="/wallet-ui">Wallet</a>
-
-</div>
+<%@ include file="../fragments/admin-sidebar.jsp" %>
 
 <div class="main-content">
 
@@ -62,7 +48,7 @@
         <h3>Payment History</h3>
 
         <input
-                id="userId"
+                id="paymentUserId"
                 placeholder="User ID">
 
         <br><br>
@@ -90,13 +76,13 @@
                 <th>User ID</th>
                 <th>Amount</th>
                 <th>Status</th>
-                <th>Payment ID</th>
+                <th>Payment Date</th>
 
             </tr>
 
             </thead>
 
-            <tbody id="paymentTableBody">
+            <tbody id="paymentBody">
 
             </tbody>
 
@@ -118,7 +104,9 @@
 
 </div>
 
-<script src="/js/payments.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script src="/js/customer-payments.js"></script>
 
 </body>
 

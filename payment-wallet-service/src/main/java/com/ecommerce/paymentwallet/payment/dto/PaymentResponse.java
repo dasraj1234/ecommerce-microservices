@@ -5,6 +5,7 @@ public class PaymentResponse {
     private String paymentId;
     private String status;
     private String message;
+    private String createdDate;
 
     
 
@@ -42,4 +43,12 @@ public class PaymentResponse {
     public void setMessage(String message) {
         this.message = message;
     }
+
+public String getCreatedDate() {
+    return createdDate;
+}
+
+public void setCreatedDate(String createdDate) {
+    this.createdDate = createdDate;
+}
 }

@@ -5,6 +5,8 @@ import com.ecommerce.productorder.order.dto.OrderRequest;
 import com.ecommerce.productorder.sql.SqlQueries;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
+import java.sql.Timestamp;
+import java.time.format.DateTimeFormatter;
 
 import java.util.List;
 import java.util.Optional;
@@ -99,7 +101,17 @@ public class OrderRepository {
                     history.setTotalAmount(rs.getDouble("total_amount"));
                     history.setStatus(rs.getString("status"));
                     history.setPaymentId(rs.getString("payment_id"));  //improvements 14th june
-                    history.setCreatedDate(rs.getTimestamp("created_date").toString());
+                    Timestamp timestamp = rs.getTimestamp("created_date");
+
+DateTimeFormatter formatter =
+        DateTimeFormatter.ofPattern(
+                "d MMMM yyyy, hh:mm a"
+        );
+
+history.setCreatedDate(
+        timestamp.toLocalDateTime()
+                 .format(formatter)
+);
                     history.setUpdatedDate(rs.getTimestamp("updated_date").toString());
                     return history;
                 },

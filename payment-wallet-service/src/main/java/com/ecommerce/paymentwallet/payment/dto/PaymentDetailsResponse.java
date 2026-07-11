@@ -10,4 +10,5 @@ public class PaymentDetailsResponse {
     private String userId;
     private Double amount;
     private String status;
+    private String createdDate;
 }
