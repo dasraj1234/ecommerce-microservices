@@ -72,11 +72,63 @@ public class PaymentService {
 
         try {
 
-            boolean debited =
-                    walletService.debit(
-                            req.getUserId(),
-                            req.getAmount()
-                    );
+           boolean debited = true;
+
+/*
+ * Wallet Payment
+ */
+if ("WALLET".equalsIgnoreCase(req.getPaymentMethod())) {
+
+    boolean validPin =
+            walletService.verifyPin(
+                    req.getUserId(),
+                    req.getWalletPin()
+            );
+
+    if (!validPin) {
+
+        paymentRepo.updateStatus(
+                PaymentStatus.FAILED.name(),
+                paymentId
+        );
+
+        PaymentResponse response =
+                new PaymentResponse(
+                        paymentId,
+                        "FAILED",
+                        "Incorrect Wallet PIN"
+                );
+
+        logRepo.log(
+                paymentId,
+                JsonUtil.toJson(req),
+                JsonUtil.toJson(response),
+                "FAILED",
+                "INVALID_PIN"
+        );
+
+        return response;
+    }
+
+   debited =
+        walletService.debit(
+
+                req.getUserId(),
+
+                paymentId,
+
+                req.getOrderId(),
+
+                req.getAmount()
+
+        );
+}
+
+/*
+ * Razorpay Payment
+ * Nothing to debit here because payment
+ * is already completed through Razorpay.
+ */
 
             if (!debited) {
 

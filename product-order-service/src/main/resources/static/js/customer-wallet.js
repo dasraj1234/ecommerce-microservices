@@ -1,23 +1,85 @@
-async function loadWallet() {
+const API =
+"http://localhost:8080";
 
-    const userId =
-        document.getElementById(
-            "walletUserId"
-        ).value;
+window.onload = function(){
 
-    const response =
+    loadWallet();
+
+};
+
+async function loadWallet(){
+
+    // Later replace this with logged-in user
+
+    const userId="USER-1001";
+
+    //-------------------------
+    // Wallet Details
+    //-------------------------
+
+    const walletResponse =
         await fetch(
-            "http://localhost:8083/wallets/"
-            + userId
+            `${API}/wallet/${userId}`
         );
 
-    const result =
-        await response.json();
+    const wallet =
+        await walletResponse.json();
 
-    document
-        .getElementById(
-            "walletBalance"
-        )
-        .innerHTML =
-        "₹" + result.balance;
+    document.getElementById("walletUserId").innerHTML =
+        wallet.userId;
+
+    document.getElementById("walletId").innerHTML =
+        wallet.walletId;
+
+    document.getElementById("walletStatus").innerHTML =
+        wallet.status;
+
+    document.getElementById("walletBalance").innerHTML =
+        "₹"+wallet.balance;
+
+    document.getElementById("walletLastTxn").innerHTML =
+        wallet.lastTransactionDate;
+
+    //-------------------------
+    // Wallet History
+    //-------------------------
+
+    const historyResponse =
+        await fetch(
+            `${API}/wallet/history/${userId}`
+        );
+
+    const history =
+        await historyResponse.json();
+
+    let html="";
+
+    history.forEach(tx=>{
+
+        html+=`
+
+<tr>
+
+<td>${tx.transactionDate}</td>
+
+<td>${tx.paymentId ?? "-"}</td>
+
+<td>${tx.orderId ?? "-"}</td>
+
+<td>${tx.transactionType}</td>
+
+<td>₹${tx.amount}</td>
+
+<td>${tx.status}</td>
+
+</tr>
+
+`;
+
+    });
+
+    document.getElementById(
+        "walletHistory"
+    ).innerHTML=html;
+
 }

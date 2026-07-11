@@ -89,33 +89,194 @@ if(!stockAvailable)
 }
 
 //razorpay integration 12th june
-    if(request.paymentMethod === "WALLET")
-{
-    const orderResponse =
+    if(request.paymentMethod === "WALLET"){
+
+   const pinDialog = await Swal.fire({
+
+    title: "Wallet Payment",
+
+    html: `
+        <div style="text-align:left">
+
+            <b>User :</b> ${request.userId}
+
+            <br><br>
+
+            Enter your 6 digit Wallet PIN
+
+            <br><br>
+
+            <div style="position:relative;">
+
+                <input
+                    id="walletPinInput"
+                    type="password"
+                    maxlength="6"
+                    class="swal2-input"
+                    style="margin:0;padding-right:45px;">
+
+                <i
+                    id="walletEye"
+                    class="fa-solid fa-eye"
+                    style="
+                        position:absolute;
+                        right:18px;
+                        top:18px;
+                        cursor:pointer;
+                        color:#666;
+                        font-size:18px;
+                    ">
+                </i>
+
+            </div>
+
+        </div>
+    `,
+
+    focusConfirm: false,
+
+    showCancelButton: true,
+
+    confirmButtonText: "Pay",
+
+    didOpen: () => {
+
+        const input =
+            document.getElementById("walletPinInput");
+
+        const eye =
+            document.getElementById("walletEye");
+
+        eye.addEventListener("click", () => {
+
+            if(input.type==="password"){
+
+                input.type="text";
+
+                eye.classList.remove("fa-eye");
+                eye.classList.add("fa-eye-slash");
+
+            }else{
+
+                input.type="password";
+
+                eye.classList.remove("fa-eye-slash");
+                eye.classList.add("fa-eye");
+
+            }
+
+        });
+
+    },
+
+    preConfirm: () => {
+
+        const pin =
+            document.getElementById("walletPinInput").value;
+
+        if(pin.length!==6){
+
+            Swal.showValidationMessage(
+                "Please enter a 6 digit PIN"
+            );
+
+            return false;
+
+        }
+
+        return pin;
+
+    }
+
+});
+
+    if(!pinDialog.isConfirmed){
+
+        button.disabled=false;
+        return;
+
+    }
+
+    const paymentResponse =
         await fetch(
-            `${API_BASE_URL}/orders/create`,
+            `${API_BASE_URL}/payments/process`,
             {
+
                 method:"POST",
 
                 headers:{
-                    "Content-Type":
-                    "application/json"
+                    "Content-Type":"application/json"
                 },
 
-                
-                body:JSON.stringify(
-                    request
-                )
-            }
-        );
-//improvements 14th june
+                body:JSON.stringify({
+
+                    orderId:
+                        "ORD-"+Date.now(),
+
+                    userId:
+                        request.userId,
+
+                    amount:
+                        request.totalAmount,
+
+                    paymentMethod:
+                        "WALLET",
+
+                    walletPin:
+                        pinDialog.value,
+
+                    idempotencyKey:
+                        "IDEMP-"+Date.now()
+
+                })
+
+            });
+
+    const payment =
+        await paymentResponse.json();
+
+    if(payment.status!=="SUCCESS"){
+
+        Swal.fire({
+
+            icon:"error",
+
+            title:"Wallet Payment Failed",
+
+            text:payment.message
+
+        });
+
+        button.disabled=false;
+
+        return;
+
+    }
+
+    request.paymentId=
+        payment.paymentId;
+
+    const orderResponse =
+        await fetch(
+
+            `${API_BASE_URL}/orders/create`,
+
+            {
+
+                method:"POST",
+
+                headers:{
+                    "Content-Type":"application/json"
+                },
+
+                body:JSON.stringify(request)
+
+            });
+
     const result =
         await orderResponse.json();
 
-        console.log(result);
-   document
-.getElementById("console")
-.innerHTML =
+    document.getElementById("console").innerHTML=
 
 `<div class="success-card">
 
@@ -123,22 +284,26 @@ if(!stockAvailable)
 
 <br><br>
 
-<b>Order ID:</b>
+<b>Order ID :</b>
+
 ${result.data.orderId}
 
 <br>
 
-<b>Amount:</b>
+<b>Amount :</b>
+
 ₹${request.totalAmount}
 
 <br>
 
-<b>Payment Method:</b>
-${request.paymentMethod}
+<b>Payment :</b>
+
+Wallet
 
 </div>`;
 
     return;
+
 }
 //razorpay integration 12th june
 console.log(
@@ -385,4 +550,165 @@ window.onload = function () {
         .value =
         unitPrice * qty;
 });
+
+let walletRequest = null;
+
+async function showWalletPopup(request){
+
+    walletRequest = request;
+
+    const response =
+        await fetch(
+            `${API_BASE_URL}/wallet/${request.userId}`
+        );
+
+    const wallet =
+        await response.json();
+
+    document.getElementById("walletUserId").innerText =
+        wallet.userId;
+
+    document.getElementById("walletBalance").innerText =
+        wallet.balance;
+
+    document.getElementById("walletAmount").innerText =
+        request.totalAmount;
+
+    document.getElementById("walletPin").value = "";
+
+    document.getElementById("walletModal").style.display =
+        "flex";
+
+}
+
+function closeWalletModal(){
+
+    document.getElementById("walletModal").style.display =
+        "none";
+
+}
+
+async function payUsingWallet(){
+
+    const pin =
+        document.getElementById("walletPin").value;
+
+    if(pin.length!==6){
+
+        alert("Enter 6 digit PIN");
+
+        return;
+
+    }
+
+    walletRequest.walletPin = pin;
+
+    const paymentResponse =
+        await fetch(
+
+            `${API_BASE_URL}/payments/process`,
+
+            {
+
+                method:"POST",
+
+                headers:{
+                    "Content-Type":"application/json"
+                },
+
+                body:JSON.stringify({
+
+                    orderId:
+                    "ORD-"+Date.now(),
+
+                    userId:
+                    walletRequest.userId,
+
+                    amount:
+                    walletRequest.totalAmount,
+
+                    paymentMethod:
+                    "WALLET",
+
+                    walletPin:
+                    pin,
+
+                    idempotencyKey:
+                    "IDEMP-"+Date.now()
+
+                })
+
+            }
+
+        );
+
+    const payment =
+        await paymentResponse.json();
+
+    if(payment.status!=="SUCCESS"){
+
+        alert(payment.message);
+
+        return;
+
+    }
+
+    walletRequest.paymentId =
+        payment.paymentId;
+
+    const orderResponse =
+        await fetch(
+
+            `${API_BASE_URL}/orders/create`,
+
+            {
+
+                method:"POST",
+
+                headers:{
+                    "Content-Type":"application/json"
+                },
+
+                body:JSON.stringify(
+                    walletRequest
+                )
+
+            }
+
+        );
+
+    const result =
+        await orderResponse.json();
+
+    closeWalletModal();
+
+    document.getElementById("console").innerHTML=
+
+`<div class="success-card">
+
+✅ Order placed successfully
+
+<br><br>
+
+<b>Order ID :</b>
+
+${result.data.orderId}
+
+<br>
+
+<b>Amount :</b>
+
+₹${walletRequest.totalAmount}
+
+<br>
+
+<b>Payment :</b>
+
+Wallet
+
+</div>`;
+
+}
+
+
 };

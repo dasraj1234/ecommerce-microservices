@@ -3,14 +3,23 @@ package com.ecommerce.paymentwallet.payment.dto;
 public class PaymentRequest {
 
     private String orderId;
+
     private String userId;
+
     private double amount;
+
     private String idempotencyKey;
+
+    // NEW
+    private String paymentMethod;
+
+    // NEW
+    private String walletPin;
 
     public String getOrderId() {
         return orderId;
     }
-//improvements 14th june
+
     public void setOrderId(String orderId) {
         this.orderId = orderId;
     }
@@ -38,5 +47,22 @@ public class PaymentRequest {
     public void setIdempotencyKey(String idempotencyKey) {
         this.idempotencyKey = idempotencyKey;
     }
-    //improvements 14th june
+
+    // NEW
+    public String getPaymentMethod() {
+        return paymentMethod;
+    }
+
+    public void setPaymentMethod(String paymentMethod) {
+        this.paymentMethod = paymentMethod;
+    }
+
+    // NEW
+    public String getWalletPin() {
+        return walletPin;
+    }
+
+    public void setWalletPin(String walletPin) {
+        this.walletPin = walletPin;
+    }
 }

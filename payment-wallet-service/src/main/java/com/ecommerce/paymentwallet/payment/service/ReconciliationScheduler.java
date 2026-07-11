@@ -1,4 +1,4 @@
-package com.ecommerce.paymentwallet.payment.service;
+/*package com.ecommerce.paymentwallet.payment.service;
 
 import com.ecommerce.paymentwallet.payment.repository.*;
 import com.ecommerce.paymentwallet.wallet.service.WalletService;
@@ -37,8 +37,16 @@ public class ReconciliationScheduler {
             Double amt = (Double) p.get("amount");
 
             if (!txnRepo.existsByPaymentId(pid)) {
-                walletService.debit(userId, amt);
+               String orderId = (String) p.get("order_id");
+
+walletService.debit(
+        userId,
+        pid,
+        orderId,
+        amt
+);
             }
         }
     }
 }
+    */

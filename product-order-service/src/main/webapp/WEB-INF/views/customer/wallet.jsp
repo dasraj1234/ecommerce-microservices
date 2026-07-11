@@ -4,18 +4,11 @@
 
 <head>
 
-<title>
-Wallet
-</title>
+<title>Wallet</title>
 
-<link rel="stylesheet"
-href="/css/theme.css">
-
-<link rel="stylesheet"
-href="/css/layout.css">
-
-<link rel="stylesheet"
-href="/css/customer.css">
+<link rel="stylesheet" href="/css/theme.css">
+<link rel="stylesheet" href="/css/layout.css">
+<link rel="stylesheet" href="/css/customer.css">
 
 </head>
 
@@ -25,40 +18,84 @@ href="/css/customer.css">
 
 <div class="main-content">
 
-<h1>
-Wallet
-</h1>
+<h1>Wallet</h1>
 
 <br>
 
 <div class="wallet-card">
 
-<h3>
-Current Balance
-</h3>
+<h3>Wallet Details</h3>
 
 <br>
 
-<div class="balance"
-id="walletBalance">
+<table>
 
-₹0
+<tr>
+<td><b>User ID</b></td>
+<td id="walletUserId">-</td>
+</tr>
+
+<tr>
+<td><b>Wallet ID</b></td>
+<td id="walletId">-</td>
+</tr>
+
+<tr>
+<td><b>Status</b></td>
+<td id="walletStatus">-</td>
+</tr>
+
+<tr>
+<td><b>Balance</b></td>
+<td class="balance" id="walletBalance">₹0</td>
+</tr>
+
+<tr>
+<td><b>Last Transaction</b></td>
+<td id="walletLastTxn">-</td>
+</tr>
+
+</table>
 
 </div>
 
-<br>
-
-<input
-id="walletUserId"
-placeholder="USER-1001">
-
 <br><br>
 
-<button onclick="loadWallet()">
+<div class="wallet-card">
 
-Check Balance
+<h3>Wallet Transactions</h3>
 
-</button>
+<br>
+
+<table
+class="table"
+width="100%">
+
+<thead>
+
+<tr>
+
+<th>Date</th>
+
+<th>Payment ID</th>
+
+<th>Order ID</th>
+
+<th>Type</th>
+
+<th>Amount</th>
+
+<th>Status</th>
+
+</tr>
+
+</thead>
+
+<tbody id="walletHistory">
+
+</tbody>
+
+</table>
 
 </div>
 

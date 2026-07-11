@@ -41,4 +41,31 @@ public class IdGenerator {
                 number
         );
     }
+
+
+public String generateWalletId() {
+
+    int number =
+            sequenceRepository.getNextNumber(
+                    "WALLET"
+            );
+
+    return String.format(
+            "WALLET%06d",
+            number
+    );
+}
+
+public String generateWalletTransactionId() {
+
+    int number =
+            sequenceRepository.getNextNumber(
+                    "WALLET_TXN"
+            );
+
+    return String.format(
+            "WTXN%06d",
+            number
+    );
+}
 }

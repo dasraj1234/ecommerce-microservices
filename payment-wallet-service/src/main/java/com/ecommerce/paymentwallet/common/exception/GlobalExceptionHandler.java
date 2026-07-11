@@ -48,13 +48,16 @@ public ResponseEntity<Map<String,Object>> handleEmptyResult(EmptyResultDataAcces
     // 🔥 500 - Generic fallback
     @ExceptionHandler(Exception.class)
     public Map<String, Object> handleGeneric(Exception ex) {
+            ex.printStackTrace(); 
 
         Map<String, Object> res = new HashMap<>();
         res.put("status", "FAILED");
         res.put("message", "Something went wrong");
-
+        
         return res;
+        
     }
+    
 
     @ExceptionHandler(DataIntegrityViolationException.class)
 public Map<String, Object> handleDB(DataIntegrityViolationException ex) {

@@ -3,7 +3,8 @@
 <html>
 
 <head>
-
+<link rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 <title>
 My Orders
 </title>
@@ -92,7 +93,7 @@ Ready
 </div>
 
 </div>
-
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="/js/customer-orders.js"></script>
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script> <!--razorpay integration frontend 12th june!-->
 
