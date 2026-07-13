@@ -10,6 +10,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 @Repository
 public class PaymentRepository {
 
@@ -138,6 +139,7 @@ public List<PaymentDetailsResponse> findByUserId(
 
     String sql =
             "SELECT * FROM payments WHERE user_id=? ORDER BY created_date DESC";
+
 
     return jdbcTemplate.query(
             sql,
