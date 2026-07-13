@@ -2,6 +2,7 @@ package com.ecommerce.paymentwallet.wallet.controller;
 
 import com.ecommerce.paymentwallet.wallet.dto.*;
 import com.ecommerce.paymentwallet.wallet.service.WalletService;
+import org.springframework.http.ResponseEntity;
 
 import lombok.RequiredArgsConstructor;
 
@@ -85,6 +86,22 @@ public class WalletController {
 
         );
 
+    }
+
+    /*
+     * Top-up Wallet
+     */
+
+    @PostMapping("/topup")
+    public ResponseEntity<WalletResponse> topup(
+            @RequestBody WalletTopupRequest request) {
+
+        WalletResponse response = walletService.topup(
+                request.getUserId(),
+                request.getAmount()
+        );
+
+        return ResponseEntity.ok(response);
     }
 
     /*

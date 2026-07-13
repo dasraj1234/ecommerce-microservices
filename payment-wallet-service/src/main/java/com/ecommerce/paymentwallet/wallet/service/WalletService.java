@@ -281,6 +281,42 @@ public String setPin(
 
     }
 
+    //-------------------------------------------------
+    // TOP-UP (CREDIT)
+    //-------------------------------------------------
+
+    public WalletResponse topup(String userId, Double amount) {
+
+        if (amount == null || amount <= 0) {
+            throw new com.ecommerce.paymentwallet.common.exception.BadRequestException(
+                "Top-up amount must be greater than zero"
+            );
+        }
+
+        String status = walletRepository.getWalletStatus(userId);
+        if ("BLOCKED".equalsIgnoreCase(status)) {
+            throw new com.ecommerce.paymentwallet.common.exception.BadRequestException(
+                "Wallet is blocked — cannot top up"
+            );
+        }
+
+        Double current = walletRepository.getBalance(userId);
+        walletRepository.updateBalance(userId, current + amount);
+
+        walletRepository.saveTransaction(
+                idGenerator.generateWalletTransactionId(),
+                walletRepository.getWalletId(userId),
+                "TOPUP",
+                null,
+                userId,
+                amount,
+                "CREDIT",
+                "SUCCESS"
+        );
+
+        return walletRepository.getWallet(userId);
+    }
+
     public List<WalletTransactionResponse> history(
 
         String userId

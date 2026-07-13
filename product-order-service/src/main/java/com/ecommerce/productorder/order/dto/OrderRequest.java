@@ -14,6 +14,8 @@ public class OrderRequest {
 
     private String paymentId;  //inconsistency fixed on 13th june
 
+    private String walletPin;
+
     public String getUserId() {
         return userId;
     }
@@ -63,5 +65,12 @@ public String getPaymentId() {
 public void setPaymentId(String paymentId) {
     this.paymentId = paymentId;
 }
-//razorpay integration 12th june
+
+public String getWalletPin() {
+    return walletPin;
+}
+
+public void setWalletPin(String walletPin) {
+    this.walletPin = walletPin;
+}
 }

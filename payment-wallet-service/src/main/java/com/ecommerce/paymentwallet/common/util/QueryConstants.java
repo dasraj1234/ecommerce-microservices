@@ -23,6 +23,8 @@ public class QueryConstants {
         "SELECT COUNT(*) FROM transactions WHERE payment_id = ?";
 
     // PAYMENT LOG
+    // Stores both plaintext (for verification) and AES-256-GCM encrypted (for security).
+    // Column order: payment_id, req_plain, req_enc, res_plain, res_enc, status, reason
     public static final String INSERT_PAYMENT_LOG =
-        "INSERT INTO payment_req_res(payment_id, request_payload, response_payload, status, reason, created_date) VALUES (?, ?, ?, ?, ?, NOW())";
+        "INSERT INTO payment_req_res(payment_id, request_payload, request_payload_enc, response_payload, response_payload_enc, status, reason, created_date) VALUES (?, ?, ?, ?, ?, ?, ?, NOW())";
 }

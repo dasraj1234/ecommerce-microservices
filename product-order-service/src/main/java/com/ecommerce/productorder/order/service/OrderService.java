@@ -176,62 +176,47 @@ orderRepository.updatePaymentId(
 }
 
 
-    PaymentRequest paymentRequest =
-            new PaymentRequest();
+    PaymentRequest paymentRequest = new PaymentRequest();
+    paymentRequest.setUserId(request.getUserId());
+    paymentRequest.setAmount(request.getTotalAmount());
+    paymentRequest.setOrderId(orderId);
+    paymentRequest.setIdempotencyKey(idempotencyKey);
+    paymentRequest.setPaymentMethod(request.getPaymentMethod());
+    paymentRequest.setWalletPin(request.getWalletPin());
 
-    paymentRequest.setUserId(
-            request.getUserId()
-    );
-
-    paymentRequest.setAmount(
-            request.getTotalAmount()
-    );
-
-    paymentRequest.setOrderId(
-            orderId
-    );
-
-    paymentRequest.setIdempotencyKey(
-            idempotencyKey
-    );
+    // Tracks whether we reduced stock so the catch block knows whether to restore it.
+    // Stock is reduced AFTER payment confirmation — not before — for wallet payments.
+    boolean stockReduced = false;
 
     try {
 
-       PaymentResponse paymentResponse;   //@raj please change to original wallet code after doing your wallet service code
+        PaymentResponse paymentResponse;
 
-if(mockWallet){     
+        if (mockWallet) {
+            paymentResponse = new PaymentResponse();
+            paymentResponse.setPaymentId("P-MOCK-" + System.currentTimeMillis());
+            paymentResponse.setStatus("SUCCESS");
+            paymentResponse.setMessage("Mock wallet payment success");
+            LOGGER.info("MOCK WALLET PAYMENT USED for order {}", orderId);
+        } else {
+            paymentResponse = paymentClient.processPayment(paymentRequest);
+        }
 
-    paymentResponse =
-            new PaymentResponse();
+        if ("SUCCESS".equals(paymentResponse.getStatus())) {
 
-    paymentResponse.setPaymentId(
-            "P-MOCK-" +
-            System.currentTimeMillis()
-    );
-
-    paymentResponse.setStatus(
-            "SUCCESS"
-    );
-
-    paymentResponse.setMessage(
-            "Mock wallet payment success"
-    );
-
-    LOGGER.info(
-            "MOCK WALLET PAYMENT USED"
-    );
-
-}else{
-
-    paymentResponse =
-            paymentClient.processPayment(  //@raj please change to original wallet code after doing your wallet service code
-
-                    paymentRequest
+            // Reduce stock only after payment is confirmed — avoids holding inventory
+            // for failed payments, and ensures the restore in the catch block is correct.
+            stockReduced = inventoryRepository.reduceStock(
+                    request.getProductId(),
+                    request.getQuantity()
             );
-}
 
-        if ("SUCCESS".equals(
-                paymentResponse.getStatus())) {
+            if (!stockReduced) {
+                // Edge case: stock ran out between order creation and payment confirmation.
+                // The wallet was debited — a refund would be needed in a real system.
+                // For now, cancel the order and surface the error to the caller.
+                throw new InsufficientStockException(request.getProductId());
+            }
 
             orderRepository.updateOrderStatus(
                     orderId,
@@ -247,35 +232,18 @@ if(mockWallet){
                     "PAYMENT_SUCCESS"
             );
 
-            LOGGER.info(
-                    "Order {} confirmed and inventory reduced",
-                    orderId
-            );
+            LOGGER.info("Order {} confirmed, stock reduced", orderId);
 
-            OrderResponse response =
-                    new OrderResponse();
-
+            OrderResponse response = new OrderResponse();
             response.setOrderId(orderId);
-            response.setStatus(
-                    OrderStatus.CONFIRMED.name()
-            );
-            response.setMessage(
-                    "Order placed successfully"
-            );
-
+            response.setStatus(OrderStatus.CONFIRMED.name());
+            response.setMessage("Order placed successfully");
             return response;
 
         } else {
 
-            inventoryRepository.restoreStock(
-                    request.getProductId(),
-                    request.getQuantity()
-            );
-
-            orderRepository.updateOrderStatus(
-                    orderId,
-                    OrderStatus.CANCELLED.name()
-            );
+            // Payment failed — no stock was touched, so no restore needed.
+            orderRepository.updateOrderStatus(orderId, OrderStatus.CANCELLED.name());
 
             logRepository.save(
                     orderId,
@@ -285,44 +253,34 @@ if(mockWallet){
                     paymentResponse.getMessage()
             );
 
-            throw new RuntimeException(
-                    paymentResponse.getMessage()
-            );
+            throw new RuntimeException(paymentResponse.getMessage());
         }
 
     } catch (Exception ex) {
 
-    inventoryRepository.restoreStock(
-            request.getProductId(),
-            request.getQuantity()
-    );
+        // Only restore stock if we actually reduced it before the exception.
+        if (stockReduced) {
+            inventoryRepository.restoreStock(request.getProductId(), request.getQuantity());
+        }
 
-    orderRepository.updateOrderStatus(
-            orderId,
-            OrderStatus.CANCELLED.name()
-    );
+        orderRepository.updateOrderStatus(orderId, OrderStatus.CANCELLED.name());
 
-    logRepository.save(
-            orderId,
-            JsonUtil.toJson(request),
-            "{}",
-            "FAILED",
-            ex.getMessage()
-    );
+        logRepository.save(
+                orderId,
+                JsonUtil.toJson(request),
+                "{}",
+                "FAILED",
+                ex.getMessage()
+        );
 
-    OrderResponse response =
-            new OrderResponse();
+        LOGGER.error("Order {} failed: {}", orderId, ex.getMessage());
 
-    response.setOrderId(orderId);
-    response.setStatus(
-            OrderStatus.CANCELLED.name()
-    );
-    response.setMessage(
-        ex.getMessage()
-);
-
-    return response;
-}
+        OrderResponse response = new OrderResponse();
+        response.setOrderId(orderId);
+        response.setStatus(OrderStatus.CANCELLED.name());
+        response.setMessage(ex.getMessage());
+        return response;
+    }
 }
 //razorpay integration 12th june
 public boolean hasStock(

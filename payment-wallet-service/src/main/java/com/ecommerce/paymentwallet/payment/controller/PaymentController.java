@@ -16,6 +16,11 @@ import com.ecommerce.paymentwallet.payment.dto.RazorpayCreateOrderRequest;
 import com.ecommerce.paymentwallet.payment.dto.RazorpayOrderResponse;
 import com.ecommerce.paymentwallet.payment.service.RazorpayService;
 
+// encryption module
+import com.ecommerce.paymentwallet.common.crypto.CryptoService;
+import com.ecommerce.paymentwallet.common.crypto.EncryptedRequest;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 
 @Tag(
     name = "Payment APIs",
@@ -32,6 +37,8 @@ public class PaymentController {
 
     private final PaymentService paymentService;
     private final RazorpayService razorpayService; //razorpay integration 12th june
+    private final CryptoService cryptoService;
+    private final ObjectMapper objectMapper;
 
 
     @Operation(summary = "Process payment")
@@ -125,6 +132,76 @@ response.setMessage(
 );
 
 return response;
+}
+
+
+// ── Encrypted endpoint variants ───────────────────────────────────────────────
+// Each /secure endpoint decrypts the incoming EncryptedRequest, delegates to the
+// same service layer as the plaintext endpoint, then returns an encrypted response.
+// The caller's AES-256 session key (RSA-wrapped in encryptedKey) is reused for
+// the response so the client can decrypt with the same key it generated.
+
+@Operation(summary = "Process wallet payment (encrypted)")
+@PostMapping("/process/secure")
+public EncryptedRequest processSecure(
+        @RequestBody EncryptedRequest encrypted) throws Exception {
+
+    byte[] aesKey = cryptoService.extractAesKey(encrypted.getEncryptedKey());
+    String json   = cryptoService.decryptPayload(
+            encrypted.getPayload(), encrypted.getIv(), aesKey);
+
+    PaymentRequest request  = objectMapper.readValue(json, PaymentRequest.class);
+    PaymentResponse response = paymentService.processPayment(request);
+
+    return cryptoService.encryptResponseWithKey(
+            objectMapper.writeValueAsString(response), aesKey);
+}
+
+@Operation(summary = "Create Razorpay order (encrypted)")
+@PostMapping("/razorpay/create-order/secure")
+public EncryptedRequest createRazorpayOrderSecure(
+        @RequestBody EncryptedRequest encrypted) throws Exception {
+
+    byte[] aesKey = cryptoService.extractAesKey(encrypted.getEncryptedKey());
+    String json   = cryptoService.decryptPayload(
+            encrypted.getPayload(), encrypted.getIv(), aesKey);
+
+    RazorpayCreateOrderRequest request  = objectMapper.readValue(json, RazorpayCreateOrderRequest.class);
+    RazorpayOrderResponse      response = razorpayService.createOrder(request);
+
+    return cryptoService.encryptResponseWithKey(
+            objectMapper.writeValueAsString(response), aesKey);
+}
+
+@Operation(summary = "Verify Razorpay payment (encrypted)")
+@PostMapping("/razorpay/verify/secure")
+public EncryptedRequest verifyPaymentSecure(
+        @RequestBody EncryptedRequest encrypted) throws Exception {
+
+    byte[] aesKey = cryptoService.extractAesKey(encrypted.getEncryptedKey());
+    String json   = cryptoService.decryptPayload(
+            encrypted.getPayload(), encrypted.getIv(), aesKey);
+
+    RazorpayVerifyRequest request   = objectMapper.readValue(json, RazorpayVerifyRequest.class);
+    String               paymentId  = razorpayService.verifyPayment(request);
+    PaymentResponse      response   = buildVerifyResponse(paymentId, request.getRazorpayPaymentId());
+
+    return cryptoService.encryptResponseWithKey(
+            objectMapper.writeValueAsString(response), aesKey);
+}
+
+private PaymentResponse buildVerifyResponse(String paymentId, String razorpayPaymentId) {
+    PaymentResponse response = new PaymentResponse();
+    if (paymentId != null) {
+        response.setPaymentId(paymentId);
+        response.setStatus("SUCCESS");
+        response.setMessage("Payment verified successfully");
+    } else {
+        response.setPaymentId(razorpayPaymentId);
+        response.setStatus("FAILED");
+        response.setMessage("Signature verification failed");
+    }
+    return response;
 }
 
 }

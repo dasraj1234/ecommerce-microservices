@@ -14,12 +14,14 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.ecommerce.paymentwallet.payment.repository.PaymentRepository; //added for verify payment api - razorpay integration 12th june
+import com.ecommerce.paymentwallet.payment.repository.PaymentLogRepository;
 import com.ecommerce.paymentwallet.common.util.IdGenerator; //added for verify payment api - razorpay integration 12th june
+import com.ecommerce.paymentwallet.common.util.JsonUtil;
 import com.ecommerce.paymentwallet.notification.dto.CustomerContact;
 import com.ecommerce.paymentwallet.notification.service.CustomerContactService;
 import com.ecommerce.paymentwallet.notification.service.NotificationService;
 import com.razorpay.Utils; //added for verify payment api - razorpay integration 12th june
-import com.ecommerce.paymentwallet.payment.dto.RazorpayVerifyRequest; //added for verify payment api - razorpay integration 
+import com.ecommerce.paymentwallet.payment.dto.RazorpayVerifyRequest; //added for verify payment api - razorpay integration
 // 12th june
 
 
@@ -32,11 +34,13 @@ public class RazorpayService {
 
     private final PaymentRepository paymentRepository;
 
+    private final PaymentLogRepository logRepository;
+
     private final IdGenerator idGenerator;
 
     private final CustomerContactService customerContactService;
 
-private final NotificationService notificationService;
+    private final NotificationService notificationService;
 
     
     @Value("${razorpay.key.id}")
@@ -191,6 +195,14 @@ System.out.println(
         "PAYMENT SAVED TO DB"
 );
 
+logRepository.log(
+        paymentId,
+        JsonUtil.toJson(request),
+        "{\"status\":\"SUCCESS\",\"paymentId\":\"" + paymentId + "\"}",
+        "SUCCESS",
+        "RAZORPAY_VERIFIED"
+);
+
 try {
 
       System.out.println("BEFORE CUSTOMER LOOKUP");
@@ -251,6 +263,15 @@ return paymentId;   // IMPORTANT
         return null;
     }
 }
+
+// Signature verification failed — log it
+logRepository.log(
+        request.getRazorpayPaymentId(),
+        JsonUtil.toJson(request),
+        "{\"status\":\"FAILED\"}",
+        "FAILED",
+        "SIGNATURE_MISMATCH"
+);
 
 return null;
 
