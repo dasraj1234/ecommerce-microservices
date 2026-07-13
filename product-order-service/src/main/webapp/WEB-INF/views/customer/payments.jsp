@@ -35,7 +35,7 @@ Payment History
 id="paymentUserId"
 placeholder="USER-1001">
 
-<button onclick="loadPayments()">
+<button onclick="getPaymentsByUser()">
 
 Load Payments
 
@@ -66,7 +66,7 @@ id="paymentBody">
 </table>
 
 </div>
-
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="/js/customer-payments.js"></script>
 
 </body>
