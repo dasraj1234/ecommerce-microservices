@@ -1,3 +1,4 @@
+/* 
 package com.ecommerce.productorder.config;
 
 import org.springframework.context.annotation.Bean;
@@ -12,3 +13,4 @@ public class RestTemplateConfig {
         return new RestTemplate();
     }
 }
+    */
