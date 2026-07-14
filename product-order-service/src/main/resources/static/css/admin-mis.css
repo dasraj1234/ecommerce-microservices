@@ -1,0 +1,397 @@
+/* ===========================
+   PAYMENT MIS
+===========================*/
+
+.filter-card{
+
+    background:#ffffff;
+
+    border-radius:12px;
+
+    padding:25px;
+
+    box-shadow:0 2px 10px rgba(0,0,0,.08);
+
+}
+
+.filter-row{
+
+    display:flex;
+
+    gap:20px;
+
+    flex-wrap:wrap;
+
+    align-items:end;
+
+}
+
+.filter-row div{
+
+    display:flex;
+
+    flex-direction:column;
+
+    flex:1;
+
+    min-width:180px;
+
+}
+
+.filter-row label{
+
+    font-weight:600;
+
+    margin-bottom:8px;
+
+    color:#2d3748;
+
+}
+
+.filter-row input,
+
+.filter-row select{
+
+    padding:12px;
+
+    border:1px solid #d1d5db;
+
+    border-radius:8px;
+
+    font-size:15px;
+
+    outline:none;
+
+}
+
+.filter-row input:focus,
+
+.filter-row select:focus{
+
+    border-color:#2563eb;
+
+    box-shadow:0 0 0 3px rgba(37,99,235,.15);
+
+}
+
+.button-row{
+
+    display:flex;
+
+    gap:15px;
+
+}
+
+.button-row button{
+
+    padding:12px 24px;
+
+    border:none;
+
+    border-radius:8px;
+
+    cursor:pointer;
+
+    font-size:15px;
+
+    font-weight:bold;
+
+    transition:.3s;
+
+}
+
+.button-row button:first-child{
+
+    background:#2563eb;
+
+    color:white;
+
+}
+
+.button-row button:first-child:hover{
+
+    background:#1d4ed8;
+
+}
+
+.button-row button:last-child{
+
+    background:#10b981;
+
+    color:white;
+
+}
+
+.button-row button:last-child:hover{
+
+    background:#059669;
+
+}
+
+/* ===========================
+SUMMARY CARDS
+===========================*/
+
+.summary-grid{
+
+    display:grid;
+
+    grid-template-columns:repeat(4,1fr);
+
+    gap:20px;
+
+}
+
+.summary-card{
+
+    background:white;
+
+    border-radius:12px;
+
+    padding:25px;
+
+    box-shadow:0 2px 10px rgba(0,0,0,.08);
+
+    text-align:center;
+
+}
+
+.summary-card h3{
+
+    margin:0;
+
+    color:#555;
+
+    font-size:16px;
+
+}
+
+.summary-card h1{
+
+    margin-top:15px;
+
+    color:#2563eb;
+
+    font-size:34px;
+
+}
+
+.summary-card.success h1{
+
+    color:#16a34a;
+
+}
+
+.summary-card.failed h1{
+
+    color:#dc2626;
+
+}
+
+/* ===========================
+TABLE
+===========================*/
+
+.table-card{
+
+    background:white;
+
+    border-radius:12px;
+
+    padding:20px;
+
+    box-shadow:0 2px 10px rgba(0,0,0,.08);
+
+    overflow-x:auto;
+
+}
+
+table{
+
+    width:100%;
+
+    border-collapse:collapse;
+
+}
+
+thead{
+
+    background:#1e3a8a;
+
+    color:white;
+
+}
+
+thead th{
+
+    padding:14px;
+
+    text-align:left;
+
+    font-size:15px;
+
+}
+
+tbody td{
+
+    padding:14px;
+
+    border-bottom:1px solid #eee;
+
+    font-size:14px;
+
+}
+
+tbody tr:hover{
+
+    background:#f8fafc;
+
+}
+
+tbody tr:nth-child(even){
+
+    background:#fafafa;
+
+}
+
+/* ===========================
+STATUS BADGES
+===========================*/
+
+.success-text{
+
+    color:#16a34a;
+
+    font-weight:bold;
+
+}
+
+.failed-text{
+
+    color:#dc2626;
+
+    font-weight:bold;
+
+}
+
+.pending-text{
+
+    color:#d97706;
+
+    font-weight:bold;
+
+}
+
+/* ===========================
+LOADING
+===========================*/
+
+.loading{
+
+    text-align:center;
+
+    padding:40px;
+
+    font-size:18px;
+
+    color:#666;
+
+}
+
+/* ===========================
+EMPTY
+===========================*/
+
+.empty{
+
+    text-align:center;
+
+    padding:40px;
+
+    color:#888;
+
+    font-size:17px;
+
+}
+
+/* ===========================
+RESPONSIVE
+===========================*/
+
+@media(max-width:1200px){
+
+.summary-grid{
+
+grid-template-columns:repeat(2,1fr);
+
+}
+
+}
+
+@media(max-width:768px){
+
+.filter-row{
+
+flex-direction:column;
+
+}
+
+.summary-grid{
+
+grid-template-columns:1fr;
+
+}
+
+.button-row{
+
+flex-direction:column;
+
+}
+
+.button-row button{
+
+width:100%;
+
+}
+
+thead{
+
+display:none;
+
+}
+
+table,
+
+tbody,
+
+tr,
+
+td{
+
+display:block;
+
+width:100%;
+
+}
+
+tbody tr{
+
+margin-bottom:15px;
+
+border:1px solid #ddd;
+
+border-radius:10px;
+
+padding:10px;
+
+}
+
+tbody td{
+
+border:none;
+
+padding:8px;
+
+}
+
+}

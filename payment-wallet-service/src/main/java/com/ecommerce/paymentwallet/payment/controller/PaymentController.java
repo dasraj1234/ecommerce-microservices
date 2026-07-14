@@ -135,6 +135,7 @@ return response;
 }
 
 
+<<<<<<< Updated upstream
 // ── Encrypted endpoint variants ───────────────────────────────────────────────
 // Each /secure endpoint decrypts the incoming EncryptedRequest, delegates to the
 // same service layer as the plaintext endpoint, then returns an encrypted response.
@@ -204,4 +205,6 @@ private PaymentResponse buildVerifyResponse(String paymentId, String razorpayPay
     return response;
 }
 
+=======
+>>>>>>> Stashed changes
 }
