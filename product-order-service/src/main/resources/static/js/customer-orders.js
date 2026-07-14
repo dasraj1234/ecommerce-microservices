@@ -1,5 +1,5 @@
 idempotencyKey:
-"IDEMP-" + Date.now()  //fixed inconsistency 13th june
+"IDEMP" + Date.now()  //fixed inconsistency 13th june
 //improvements 14th june
 let unitPrice = 0;
 
@@ -226,7 +226,7 @@ if(!stockAvailable)
                         pinDialog.value,
 
                     idempotencyKey:
-                        "IDEMP-"+Date.now()
+                        "IDEMP"+Date.now()
 
                 })
 
@@ -310,6 +310,25 @@ console.log(
     "TOTAL AMOUNT SENT TO RAZORPAY = ",
     request.totalAmount
 );
+
+// Generate Internal Order ID from backend
+
+const orderIdResponse =
+await fetch(
+    `${API_BASE_URL}/orders/generate-order-id`
+);
+
+const orderData =
+await orderIdResponse.json();
+
+request.orderId =
+orderData.orderId;
+
+console.log(
+    "OUR ORDER ID =",
+    request.orderId
+);
+
     const paymentResponse =
         await fetch(
             `${API_BASE_URL}/payments/razorpay/create-order`,
@@ -321,17 +340,15 @@ console.log(
                     "application/json"
                 },
 
-                body:JSON.stringify({
-                    userId:
-                    request.userId,
+body: JSON.stringify({
 
-                    orderId:
-                    "ORD-" +
-                    Date.now(),
+    userId: request.userId,
 
-                    amount:
-                    request.totalAmount
-                })
+    orderId: request.orderId,
+
+    amount: request.totalAmount
+
+})
             }
         );
         //improvements 14th june
@@ -407,14 +424,14 @@ console.log("USER ID =", request.userId);
                             request.userId,
 
                             orderId:
-                            paymentData.razorpayOrderId,
+                            request.orderId,
 
                             amount:
                             request.totalAmount,
                             //improvements 14th june
                         
     idempotencyKey:
-    "IDEMP-" + Date.now()
+    "IDEMP" + Date.now()
                         })
                     }
                 );
@@ -603,6 +620,17 @@ async function payUsingWallet(){
 
     walletRequest.walletPin = pin;
 
+    const orderIdResponse =
+await fetch(
+    `${API_BASE_URL}/orders/generate-order-id`
+);
+
+const orderData =
+await orderIdResponse.json();
+
+walletRequest.orderId =
+orderData.orderId;
+
     const paymentResponse =
         await fetch(
 
@@ -619,8 +647,7 @@ async function payUsingWallet(){
                 body:JSON.stringify({
 
                     orderId:
-                    "ORD-"+Date.now(),
-
+                    walletRequest.orderId,
                     userId:
                     walletRequest.userId,
 
@@ -634,7 +661,7 @@ async function payUsingWallet(){
                     pin,
 
                     idempotencyKey:
-                    "IDEMP-"+Date.now()
+                    "IDEMP"+Date.now()
 
                 })
 

@@ -55,14 +55,14 @@ public class PaymentRepository {
 }
 
 public void insert(String paymentId, String orderId, String userId,
-                   double amount, String status, String idempotencyKey) {
+                   double amount, String paymentMethod,String status, String idempotencyKey) {
 
     String sql = "INSERT INTO payments " +
-            "(payment_id, order_id, user_id, amount, status, idempotency_key) " +
-            "VALUES (?, ?, ?, ?, ?, ?)";
+            "(payment_id, order_id, user_id, amount, payment_method,status, idempotency_key) " +
+            "VALUES (?, ?, ?, ?, ?, ?, ?)";
 
     jdbcTemplate.update(sql,
-            paymentId, orderId, userId, amount, status, idempotencyKey);
+            paymentId, orderId, userId, amount, paymentMethod,status, idempotencyKey);
 }
 
     public void updateStatus(String status, String paymentId) {
@@ -207,9 +207,9 @@ public void saveRazorpayPayment(
 
     String sql =
         "INSERT INTO payments " +
-        "(payment_id,order_id,user_id,amount,idempotency_key,status," +
+        "(payment_id,order_id,user_id,amount,payment_method,idempotency_key,status," +
         "razorpay_order_id,razorpay_payment_id,razorpay_signature) " +
-        "VALUES (?,?,?,?,?,?,?,?,?)";
+        "VALUES (?,?,?,?,?,?,?,?,?,?)";
 
    jdbcTemplate.update(
     sql,
@@ -217,12 +217,22 @@ public void saveRazorpayPayment(
     orderId,
     userId,
     amount,
+    "RAZORPAY",
     idempotency_key,
     "SUCCESS",
     razorpayOrderId,
     razorpayPaymentId,
     razorpaySignature
 );
+}
+
+public void updateOrderId(String paymentId, String orderId) {
+
+    jdbcTemplate.update(
+        "UPDATE payments SET order_id=? WHERE payment_id=?",
+        orderId,
+        paymentId
+    );
 }
 
 }

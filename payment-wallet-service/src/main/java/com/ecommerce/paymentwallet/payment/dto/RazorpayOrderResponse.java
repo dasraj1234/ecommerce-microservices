@@ -11,6 +11,8 @@ public class RazorpayOrderResponse {
 
     private String razorpayOrderId;
 
+    private String orderId; 
+
     private String key;
 
     private Double amount;

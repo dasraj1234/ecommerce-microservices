@@ -92,8 +92,18 @@ public class OrderService {
 
 
 
-    String orderId =
-            idGenerator.generateOrderId();
+   String orderId;
+
+if (request.getOrderId() != null &&
+    !request.getOrderId().isBlank()) {
+
+    orderId = request.getOrderId();
+
+} else {
+
+    orderId = idGenerator.generateOrderId();
+
+}
 
     String idempotencyKey =
             idGenerator.generateIdempotencyKey();
@@ -337,4 +347,10 @@ public boolean hasStock(
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'updateStatus'");
     }
+
+    public String generateOrderId() {
+
+    return idGenerator.generateOrderId();
+
+}
 }

@@ -16,6 +16,8 @@ public class OrderRequest {
 
     private String walletPin;
 
+    private String orderId;
+
     public String getUserId() {
         return userId;
     }
@@ -73,4 +75,14 @@ public String getWalletPin() {
 public void setWalletPin(String walletPin) {
     this.walletPin = walletPin;
 }
+//razorpay integration 12th june
+
+public String getOrderId() {
+    return orderId;
+}
+
+public void setOrderId(String orderId) {
+    this.orderId = orderId;
+}
+
 }

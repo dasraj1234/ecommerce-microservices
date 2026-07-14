@@ -66,6 +66,7 @@ public class PaymentService {
                 req.getOrderId(),
                 req.getUserId(),
                 req.getAmount(),
+                req.getPaymentMethod(),
                 PaymentStatus.PENDING.name(),
                 req.getIdempotencyKey()
         );

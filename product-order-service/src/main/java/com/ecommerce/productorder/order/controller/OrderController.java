@@ -12,6 +12,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 
 
@@ -98,4 +99,15 @@ public boolean checkStock(
             quantity
     );
 }
+
+@GetMapping("/generate-order-id")
+public Map<String, String> generateOrderId() {
+
+    return Map.of(
+        "orderId",
+        service.generateOrderId()
+    );
+
+}
+
 }
