@@ -1,5 +1,6 @@
 import { apiRequest, unwrap } from "./client";
 import { getToken } from "../auth/session";
+import { securePost } from "../payments/cryptoClient";
 
 // Payment Wallet Service endpoints (:8083, /payments — via Vite proxy).
 //
@@ -72,4 +73,35 @@ export async function verifyRazorpayPayment(payload) {
     token: getToken(),
   });
   return unwrap(res);
+}
+
+// ── Encrypted variants (/secure endpoints) ────────────────────────────────────
+// These call the same business logic server-side but encrypt the request body
+// with RSA-2048/OAEP + AES-256-GCM and decrypt the response automatically.
+// Drop-in replacements — return the same shape as the plaintext functions above.
+
+/**
+ * POST /payments/process/secure — wallet payment with encrypted payload.
+ * @param {{userId, orderId, amount, idempotencyKey, paymentMethod, walletPin}} payload
+ */
+export async function processWalletPaymentSecure(payload) {
+  return securePost("/payments/process/secure", payload, getToken());
+}
+
+/**
+ * POST /payments/razorpay/create-order/secure — create Razorpay order (encrypted).
+ * @param {{userId, orderId, amount}} payload  amount in RUPEES
+ * @returns {Promise<{razorpayOrderId, key, amount, currency}>}
+ */
+export async function createRazorpayOrderSecure(payload) {
+  return securePost("/payments/razorpay/create-order/secure", payload, getToken());
+}
+
+/**
+ * POST /payments/razorpay/verify/secure — verify Razorpay payment (encrypted).
+ * @param {{razorpayOrderId, razorpayPaymentId, razorpaySignature, userId, orderId, idempotencyKey, amount}} payload
+ * @returns {Promise<{paymentId, status, message}>}
+ */
+export async function verifyRazorpayPaymentSecure(payload) {
+  return securePost("/payments/razorpay/verify/secure", payload, getToken());
 }
