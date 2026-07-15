@@ -1,5 +1,10 @@
 import { useEffect, useState } from "react";
-import Sidebar from "../../components/Sidebar";
+import PageShell from "../../components/PageShell";
+import Card from "../../components/Card";
+import Field from "../../components/Field";
+import Button from "../../components/Button";
+import IdTag from "../../components/IdTag";
+import StatusBadge from "../../components/StatusBadge";
 import { getUserPayments } from "../../api/payments";
 import { getUserId, setUserId } from "../../auth/session";
 
@@ -22,7 +27,7 @@ export default function CustomerPayments() {
     setError("");
     setLoading(true);
     try {
-      setUserId(id); // remember for other pages
+      setUserId(id);
       const data = await getUserPayments(id);
       setPayments(data || []);
     } catch (err) {
@@ -33,59 +38,63 @@ export default function CustomerPayments() {
     }
   };
 
-  // Auto-load if we already know the user's business id.
   useEffect(() => {
     if (userId) load(userId);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
-    <div className="layout">
-      <Sidebar type="customer" />
-      <div className="main-content">
-        <h1>Payment History</h1>
-
-        <div className="card">
-          <input
+    <PageShell type="customer" eyebrow="Storefront" title="Payment history">
+      <Card className="mb-6">
+        <div className="flex flex-wrap items-end gap-3">
+          <Field
+            label="User ID"
             placeholder="USER-1001"
             value={userId}
             onChange={(e) => setUserIdInput(e.target.value)}
+            className="max-w-xs flex-1"
           />
-          <button onClick={() => load(userId)} disabled={loading}>
-            {loading ? "Loading..." : "Load Payments"}
-          </button>
-          {error && <p style={{ color: "#dc2626", marginTop: 12 }}>{error}</p>}
+          <Button variant="brand" onClick={() => load(userId)} disabled={loading}>
+            {loading ? "Loading…" : "Load payments"}
+          </Button>
         </div>
+        {error && (
+          <p className="mt-3 rounded-lg border border-red-500/20 bg-red-500/5 px-3.5 py-2.5 text-sm text-red-600">
+            {error}
+          </p>
+        )}
+      </Card>
 
-        {payments && (
-          <div className="card" style={{ marginTop: 20 }}>
-            {payments.length === 0 ? (
-              <p>No payments found for {userId}.</p>
-            ) : (
-              <table style={{ width: "100%", borderCollapse: "collapse" }}>
+      {payments && (
+        <Card title="Results">
+          {payments.length === 0 ? (
+            <p className="text-sm text-ink-600">No payments found for {userId}.</p>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full border-collapse text-sm">
                 <thead>
-                  <tr style={{ textAlign: "left", borderBottom: "1px solid #eee" }}>
-                    <th style={{ padding: 8 }}>Payment ID</th>
-                    <th style={{ padding: 8 }}>Order ID</th>
-                    <th style={{ padding: 8 }}>Amount</th>
-                    <th style={{ padding: 8 }}>Status</th>
+                  <tr className="border-b border-ink-900/10 text-left text-xs uppercase tracking-wide text-ink-600/60">
+                    <th className="py-2.5 pr-4 font-medium">Payment</th>
+                    <th className="py-2.5 pr-4 font-medium">Order</th>
+                    <th className="py-2.5 pr-4 font-medium">Amount</th>
+                    <th className="py-2.5 pr-4 font-medium">Status</th>
                   </tr>
                 </thead>
                 <tbody>
                   {payments.map((p) => (
-                    <tr key={p.paymentId} style={{ borderBottom: "1px solid #f3f4f6" }}>
-                      <td style={{ padding: 8 }}>{p.paymentId}</td>
-                      <td style={{ padding: 8 }}>{p.orderId}</td>
-                      <td style={{ padding: 8 }}>₹{p.amount}</td>
-                      <td style={{ padding: 8 }}>{p.status}</td>
+                    <tr key={p.paymentId} className="border-b border-ink-900/5 last:border-0">
+                      <td className="py-3 pr-4"><IdTag>{p.paymentId}</IdTag></td>
+                      <td className="py-3 pr-4"><IdTag>{p.orderId}</IdTag></td>
+                      <td className="py-3 pr-4 font-mono text-ink-900">₹{p.amount}</td>
+                      <td className="py-3 pr-4"><StatusBadge status={p.status} /></td>
                     </tr>
                   ))}
                 </tbody>
               </table>
-            )}
-          </div>
-        )}
-      </div>
-    </div>
+            </div>
+          )}
+        </Card>
+      )}
+    </PageShell>
   );
 }

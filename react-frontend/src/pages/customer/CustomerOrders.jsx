@@ -1,5 +1,10 @@
 import { useState } from "react";
-import Sidebar from "../../components/Sidebar";
+import PageShell from "../../components/PageShell";
+import Card from "../../components/Card";
+import Field from "../../components/Field";
+import Button from "../../components/Button";
+import IdTag from "../../components/IdTag";
+import StatusBadge from "../../components/StatusBadge";
 import { createOrder } from "../../api/orders";
 import { getUserId, setUserId } from "../../auth/session";
 
@@ -47,7 +52,7 @@ export default function CustomerOrders() {
 
     setPlacing(true);
     try {
-      setUserId(userId.trim()); // remember for other pages
+      setUserId(userId.trim());
       const data = await createOrder({
         userId: userId.trim(),
         productId: form.productId.trim(),
@@ -64,60 +69,52 @@ export default function CustomerOrders() {
   };
 
   return (
-    <div className="layout">
-      <Sidebar type="customer" />
-      <div className="main-content">
-        <h1>Place Order</h1>
-
-        <div className="card">
-          <input
-            placeholder="USER-1001"
-            value={userId}
-            onChange={(e) => setUserIdInput(e.target.value)}
-          />
-          <input
-            name="productId"
-            placeholder="Product ID"
-            value={form.productId}
-            onChange={onChange}
-          />
-          <input
-            name="quantity"
-            type="number"
-            placeholder="Quantity"
-            value={form.quantity}
-            onChange={onChange}
-          />
-          <input
-            name="amount"
-            type="number"
-            placeholder="Amount"
-            value={form.amount}
-            onChange={onChange}
-          />
-          <button onClick={submit} disabled={placing}>
-            {placing ? "Placing..." : "Place Order"}
-          </button>
-          {error && <p style={{ color: "#dc2626", marginTop: 12 }}>{error}</p>}
-        </div>
-
-        {result && (
-          <div className="card" style={{ marginTop: 20 }}>
-            <h3>Order {result.status === "CONFIRMED" ? "Confirmed" : "Result"}</h3>
-            <p>
-              <strong>Order ID:</strong> {result.orderId}
-            </p>
-            <p>
-              <strong>Status:</strong> {result.status}
-            </p>
-            {result.message && (
-              <p>
-                <strong>Message:</strong> {result.message}
+    <PageShell type="customer" eyebrow="Storefront" title="Place an order">
+      <div className="grid gap-6 lg:grid-cols-[420px_1fr]">
+        <Card title="Order details">
+          <div className="space-y-4">
+            <Field label="User ID" placeholder="USER-1001" value={userId} onChange={(e) => setUserIdInput(e.target.value)} />
+            <Field name="productId" label="Product ID" placeholder="PROD-1001" value={form.productId} onChange={onChange} />
+            <div className="grid grid-cols-2 gap-3">
+              <Field name="quantity" type="number" label="Quantity" placeholder="1" value={form.quantity} onChange={onChange} />
+              <Field name="amount" type="number" label="Amount" placeholder="0.00" value={form.amount} onChange={onChange} />
+            </div>
+            <Button variant="brand" onClick={submit} disabled={placing} className="w-full">
+              {placing ? "Placing…" : "Place order"}
+            </Button>
+            {error && (
+              <p className="rounded-lg border border-red-500/20 bg-red-500/5 px-3.5 py-2.5 text-sm text-red-600">
+                {error}
               </p>
             )}
           </div>
+        </Card>
+
+        {result ? (
+          <Card title="Order placed">
+            <dl className="grid grid-cols-2 gap-x-6 gap-y-4 text-sm">
+              <div>
+                <dt className="text-xs uppercase tracking-wide text-ink-600/60">Order</dt>
+                <dd className="mt-1"><IdTag>{result.orderId}</IdTag></dd>
+              </div>
+              <div>
+                <dt className="text-xs uppercase tracking-wide text-ink-600/60">Status</dt>
+                <dd className="mt-1"><StatusBadge status={result.status} /></dd>
+              </div>
+              {result.message && (
+                <div className="col-span-2">
+                  <dt className="text-xs uppercase tracking-wide text-ink-600/60">Message</dt>
+                  <dd className="mt-1 text-ink-900">{result.message}</dd>
+                </div>
+              )}
+            </dl>
+          </Card>
+        ) : (
+          <Card className="flex items-center justify-center border-dashed text-sm text-ink-600/60">
+            Your order confirmation will appear here.
+          </Card>
         )}
       </div>
-    </div>
+    </PageShell>
   );
 }

@@ -1,5 +1,9 @@
 import { useEffect, useState } from "react";
-import Sidebar from "../../components/Sidebar";
+import PageShell from "../../components/PageShell";
+import Card from "../../components/Card";
+import Field from "../../components/Field";
+import Button from "../../components/Button";
+import IdTag from "../../components/IdTag";
 import { createProduct, searchProducts } from "../../api/products";
 
 // Admin product management.
@@ -9,7 +13,7 @@ const EMPTY_FORM = { productName: "", category: "", price: "", stock: "" };
 export default function AdminProducts() {
   const [form, setForm] = useState(EMPTY_FORM);
   const [products, setProducts] = useState([]);
-  const [status, setStatus] = useState("Admin Product Console");
+  const [status, setStatus] = useState(null);
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -22,7 +26,7 @@ export default function AdminProducts() {
       const data = await searchProducts();
       setProducts(data || []);
     } catch (err) {
-      setStatus(`[ERROR] ${err.message || "Could not load products."}`);
+      setStatus({ ok: false, message: err.message || "Could not load products." });
     } finally {
       setLoading(false);
     }
@@ -35,11 +39,11 @@ export default function AdminProducts() {
 
   const submit = async () => {
     if (!form.productName.trim()) {
-      setStatus("[ERROR] Product name is required.");
+      setStatus({ ok: false, message: "Product name is required." });
       return;
     }
     setSaving(true);
-    setStatus("");
+    setStatus(null);
     try {
       await createProduct({
         productName: form.productName.trim(),
@@ -47,103 +51,116 @@ export default function AdminProducts() {
         price: parseFloat(form.price),
         stock: parseInt(form.stock, 10),
       });
-      setStatus("[SUCCESS] Product created successfully");
+      setStatus({ ok: true, message: "Product created successfully." });
       setForm(EMPTY_FORM);
       await loadProducts();
     } catch (err) {
-      setStatus(`[ERROR] ${err.message || "Could not create product."}`);
+      setStatus({ ok: false, message: err.message || "Could not create product." });
     } finally {
       setSaving(false);
     }
   };
 
   return (
-    <div className="layout">
-      <Sidebar type="admin" />
-      <div className="main-content">
-        <div className="page-title">Product Management</div>
+    <PageShell type="admin" eyebrow="Ops Console" title="Product Management">
+      <div className="grid gap-6 lg:grid-cols-[360px_1fr]">
+        <Card title="Create product" subtitle="Adds a new item to the catalog">
+          <div className="space-y-4">
+            <Field
+              name="productName"
+              label="Product name"
+              placeholder="e.g. Wireless Mouse"
+              value={form.productName}
+              onChange={onChange}
+            />
+            <Field
+              name="category"
+              label="Category"
+              placeholder="e.g. Electronics"
+              value={form.category}
+              onChange={onChange}
+            />
+            <div className="grid grid-cols-2 gap-3">
+              <Field
+                name="price"
+                type="number"
+                label="Price"
+                placeholder="0.00"
+                value={form.price}
+                onChange={onChange}
+              />
+              <Field
+                name="stock"
+                type="number"
+                label="Stock"
+                placeholder="0"
+                value={form.stock}
+                onChange={onChange}
+              />
+            </div>
+            <Button variant="brand" onClick={submit} disabled={saving} className="w-full">
+              {saving ? "Creating…" : "Create product"}
+            </Button>
+            {status && (
+              <p
+                className={`rounded-lg px-3.5 py-2.5 text-sm ${
+                  status.ok
+                    ? "border border-teal/20 bg-teal/10 text-teal-dark"
+                    : "border border-red-500/20 bg-red-500/5 text-red-600"
+                }`}
+              >
+                {status.message}
+              </p>
+            )}
+          </div>
+        </Card>
 
-        <div className="card">
-          <h3>Create Product</h3>
-          <input
-            name="productName"
-            placeholder="Product Name"
-            value={form.productName}
-            onChange={onChange}
-          />
-          <input
-            name="category"
-            placeholder="Category"
-            value={form.category}
-            onChange={onChange}
-          />
-          <input
-            name="price"
-            type="number"
-            placeholder="Price"
-            value={form.price}
-            onChange={onChange}
-          />
-          <input
-            name="stock"
-            type="number"
-            placeholder="Stock"
-            value={form.stock}
-            onChange={onChange}
-          />
-          <button onClick={submit} disabled={saving}>
-            {saving ? "Creating..." : "Create Product"}
-          </button>
-        </div>
+        <Card
+          title="Catalog"
+          subtitle={`${products.length} product${products.length === 1 ? "" : "s"} listed`}
+        >
+          <div className="mb-4 flex justify-end">
+            <Button variant="outline" onClick={loadProducts} disabled={loading}>
+              {loading ? "Refreshing…" : "Refresh"}
+            </Button>
+          </div>
 
-        <div className="card" style={{ marginTop: 20 }}>
-          <h3>Product Catalog</h3>
-          <button onClick={loadProducts} disabled={loading}>
-            {loading ? "Loading..." : "Refresh Products"}
-          </button>
-
-          <table
-            className="admin-table"
-            style={{ width: "100%", borderCollapse: "collapse", marginTop: 16 }}
-          >
-            <thead>
-              <tr style={{ textAlign: "left", borderBottom: "1px solid #eee" }}>
-                <th style={{ padding: 8 }}>ID</th>
-                <th style={{ padding: 8 }}>Name</th>
-                <th style={{ padding: 8 }}>Category</th>
-                <th style={{ padding: 8 }}>Price</th>
-                <th style={{ padding: 8 }}>Stock</th>
-              </tr>
-            </thead>
-            <tbody>
-              {products.length === 0 ? (
-                <tr>
-                  <td style={{ padding: 8 }} colSpan={5}>
-                    No products yet.
-                  </td>
+          <div className="overflow-x-auto">
+            <table className="w-full border-collapse text-sm">
+              <thead>
+                <tr className="border-b border-ink-900/10 text-left text-xs uppercase tracking-wide text-ink-600/60">
+                  <th className="py-2.5 pr-4 font-medium">ID</th>
+                  <th className="py-2.5 pr-4 font-medium">Name</th>
+                  <th className="py-2.5 pr-4 font-medium">Category</th>
+                  <th className="py-2.5 pr-4 font-medium">Price</th>
+                  <th className="py-2.5 pr-4 font-medium">Stock</th>
                 </tr>
-              ) : (
-                products.map((p) => (
-                  <tr
-                    key={p.productId}
-                    style={{ borderBottom: "1px solid #f3f4f6" }}
-                  >
-                    <td style={{ padding: 8 }}>{p.productId}</td>
-                    <td style={{ padding: 8 }}>{p.productName}</td>
-                    <td style={{ padding: 8 }}>{p.category}</td>
-                    <td style={{ padding: 8 }}>₹{p.price}</td>
-                    <td style={{ padding: 8 }}>{p.stock}</td>
+              </thead>
+              <tbody>
+                {products.length === 0 ? (
+                  <tr>
+                    <td className="py-6 text-ink-600/60" colSpan={5}>
+                      No products yet — create the first one on the left.
+                    </td>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-
-        <div className="console" style={{ marginTop: 20 }}>
-          {status}
-        </div>
+                ) : (
+                  products.map((p) => (
+                    <tr key={p.productId} className="border-b border-ink-900/5 last:border-0">
+                      <td className="py-3 pr-4">
+                        <IdTag>{p.productId}</IdTag>
+                      </td>
+                      <td className="py-3 pr-4 font-medium text-ink-900">{p.productName}</td>
+                      <td className="py-3 pr-4 text-ink-600">{p.category}</td>
+                      <td className="py-3 pr-4 font-mono text-ink-900">₹{p.price}</td>
+                      <td className="py-3 pr-4 font-mono text-ink-600">{p.stock}</td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        </Card>
       </div>
-    </div>
+    </PageShell>
   );
 }

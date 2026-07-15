@@ -1,5 +1,9 @@
 import { useEffect, useState } from "react";
-import Sidebar from "../../components/Sidebar";
+import PageShell from "../../components/PageShell";
+import Card from "../../components/Card";
+import Field from "../../components/Field";
+import Button from "../../components/Button";
+import IdTag from "../../components/IdTag";
 import { searchProducts } from "../../api/products";
 import { createOrder } from "../../api/orders";
 import { getUserId, setUserId } from "../../auth/session";
@@ -34,7 +38,6 @@ export default function CustomerHome() {
   }, []);
 
   const quantityFor = (productId) => quantities[productId] ?? 1;
-
   const setQuantityFor = (productId, value) =>
     setQuantities((q) => ({ ...q, [productId]: value }));
 
@@ -44,7 +47,7 @@ export default function CustomerHome() {
     if (!userId.trim()) {
       setOrderStatus((s) => ({
         ...s,
-        [product.productId]: { ok: false, message: "Enter your user id (e.g. USER-1001) above first." },
+        [product.productId]: { ok: false, message: "Enter your user id above first." },
       }));
       return;
     }
@@ -81,75 +84,82 @@ export default function CustomerHome() {
   };
 
   return (
-    <div className="layout">
-      <Sidebar type="customer" />
-      <div className="main-content">
-        <h1>Product Store</h1>
-
-        <div className="card" style={{ marginBottom: 20 }}>
-          <label style={{ fontWeight: 600 }}>Your User ID</label>
-          <input
+    <PageShell type="customer" eyebrow="Storefront" title="Browse products">
+      <Card className="mb-6 !p-4">
+        <div className="flex flex-wrap items-end gap-3">
+          <Field
+            label="Your user ID"
             placeholder="USER-1001"
             value={userId}
             onChange={(e) => setUserIdInput(e.target.value)}
+            className="max-w-xs flex-1"
           />
+          <p className="pb-2.5 text-xs text-ink-600/60">
+            Used to place orders and look up your history.
+          </p>
         </div>
+      </Card>
 
-        {loading ? (
-          <div className="card">Loading Products...</div>
-        ) : error ? (
-          <div className="card">{`[ERROR] ${error}`}</div>
-        ) : products.length === 0 ? (
-          <div className="card">No products available.</div>
-        ) : (
-          <div className="grid grid-cols-2 gap-5 sm:grid-cols-3 lg:grid-cols-4">
-            {products.map((p) => {
-              const status = orderStatus[p.productId];
-              return (
-                <div
-                  key={p.productId}
-                  className="card flex aspect-square flex-col justify-between"
-                >
-                  <div>
-                    <h3 className="text-base font-semibold leading-tight">{p.productName}</h3>
-                    <p className="mt-1 text-sm text-gray-500">{p.category}</p>
-                    <p className="mt-3 text-lg font-bold">₹{p.price}</p>
-                    <p className="text-xs text-gray-500">Stock: {p.stock}</p>
-                  </div>
-
-                  <div>
-                    <input
-                      type="number"
-                      min="1"
-                      value={quantityFor(p.productId)}
-                      onChange={(e) => setQuantityFor(p.productId, e.target.value)}
-                      style={{ marginTop: 8 }}
-                    />
-                    <button
-                      onClick={() => placeOrder(p)}
-                      disabled={ordering === p.productId}
-                      style={{ width: "100%" }}
-                    >
-                      {ordering === p.productId ? "Ordering..." : "Order"}
-                    </button>
-                    {status && (
-                      <p
-                        style={{
-                          marginTop: 8,
-                          fontSize: 12,
-                          color: status.ok ? "#16a34a" : "#dc2626",
-                        }}
-                      >
-                        {status.message}
-                      </p>
+      {loading ? (
+        <Card className="text-sm text-ink-600">Loading products…</Card>
+      ) : error ? (
+        <Card className="text-sm text-red-600">{error}</Card>
+      ) : products.length === 0 ? (
+        <Card className="text-sm text-ink-600">No products available yet.</Card>
+      ) : (
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {products.map((p) => {
+            const status = orderStatus[p.productId];
+            const lowStock = typeof p.stock === "number" && p.stock <= 5;
+            return (
+              <div
+                key={p.productId}
+                className="flex flex-col justify-between rounded-2xl border border-ink-900/[0.06] bg-white p-5 shadow-card"
+              >
+                <div>
+                  <div className="mb-2 flex items-start justify-between gap-2">
+                    <IdTag>{p.productId}</IdTag>
+                    {lowStock && (
+                      <span className="rounded-full bg-brand/10 px-2 py-0.5 text-[11px] font-medium text-brand-dark">
+                        Low stock
+                      </span>
                     )}
                   </div>
+                  <h3 className="font-display text-base font-semibold leading-tight text-ink-900">
+                    {p.productName}
+                  </h3>
+                  <p className="mt-1 text-sm text-ink-600">{p.category}</p>
+                  <p className="mt-3 font-mono text-xl font-semibold text-ink-900">₹{p.price}</p>
+                  <p className="mt-0.5 text-xs text-ink-600/60">{p.stock} in stock</p>
                 </div>
-              );
-            })}
-          </div>
-        )}
-      </div>
-    </div>
+
+                <div className="mt-4 space-y-2.5">
+                  <input
+                    type="number"
+                    min="1"
+                    value={quantityFor(p.productId)}
+                    onChange={(e) => setQuantityFor(p.productId, e.target.value)}
+                    className="w-full rounded-lg border border-ink-900/10 bg-paper px-3 py-2 text-sm outline-none focus:border-brand focus:ring-2 focus:ring-brand/20"
+                  />
+                  <Button
+                    variant="brand"
+                    onClick={() => placeOrder(p)}
+                    disabled={ordering === p.productId}
+                    className="w-full"
+                  >
+                    {ordering === p.productId ? "Ordering…" : "Order now"}
+                  </Button>
+                  {status && (
+                    <p className={`text-xs ${status.ok ? "text-teal-dark" : "text-red-600"}`}>
+                      {status.message}
+                    </p>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </PageShell>
   );
 }

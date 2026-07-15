@@ -1,5 +1,10 @@
 import { useState } from "react";
-import Sidebar from "../../components/Sidebar";
+import PageShell from "../../components/PageShell";
+import Card from "../../components/Card";
+import Field from "../../components/Field";
+import Button from "../../components/Button";
+import IdTag from "../../components/IdTag";
+import StatusBadge from "../../components/StatusBadge";
 import { createOrder, cancelOrder, getOrderHistory } from "../../api/orders";
 
 // Admin order management.
@@ -12,19 +17,20 @@ export default function AdminOrders() {
   const [cancelId, setCancelId] = useState("");
   const [historyUserId, setHistoryUserId] = useState("");
   const [orders, setOrders] = useState([]);
-  const [status, setStatus] = useState("[INFO] Orders Console Ready");
+  const [log, setLog] = useState([{ level: "info", text: "Orders console ready." }]);
   const [busy, setBusy] = useState("");
+
+  const pushLog = (level, text) => setLog((l) => [{ level, text }, ...l].slice(0, 6));
 
   const onChange = (e) =>
     setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
 
   const create = async () => {
     if (!form.userId.trim() || !form.productId.trim()) {
-      setStatus("[ERROR] User ID and Product ID are required.");
+      pushLog("error", "User ID and Product ID are required.");
       return;
     }
     setBusy("create");
-    setStatus("");
     try {
       const result = await createOrder({
         userId: form.userId.trim(),
@@ -32,10 +38,10 @@ export default function AdminOrders() {
         quantity: parseInt(form.quantity, 10),
         totalAmount: parseFloat(form.totalAmount),
       });
-      setStatus(`[SUCCESS] Order placed — ${result.orderId} (${result.status})`);
+      pushLog("success", `Order placed — ${result.orderId} (${result.status})`);
       setForm(EMPTY_ORDER);
     } catch (err) {
-      setStatus(`[ERROR] ${err.message || "Could not create order."}`);
+      pushLog("error", err.message || "Could not create order.");
     } finally {
       setBusy("");
     }
@@ -43,19 +49,17 @@ export default function AdminOrders() {
 
   const cancel = async () => {
     if (!cancelId.trim()) {
-      setStatus("[ERROR] Enter an order id to cancel.");
+      pushLog("error", "Enter an order id to cancel.");
       return;
     }
     setBusy("cancel");
-    setStatus("");
     try {
       const result = await cancelOrder(cancelId.trim());
-      setStatus(`[SUCCESS] Order ${result.orderId} — ${result.status}`);
+      pushLog("success", `Order ${result.orderId} — ${result.status}`);
       setCancelId("");
-      // Refresh history if we're viewing the same user's orders.
       if (historyUserId.trim()) loadHistory();
     } catch (err) {
-      setStatus(`[ERROR] ${err.message || "Could not cancel order."}`);
+      pushLog("error", err.message || "Could not cancel order.");
     } finally {
       setBusy("");
     }
@@ -63,17 +67,16 @@ export default function AdminOrders() {
 
   const loadHistory = async () => {
     if (!historyUserId.trim()) {
-      setStatus("[ERROR] Enter a user id to load history.");
+      pushLog("error", "Enter a user id to load history.");
       return;
     }
     setBusy("history");
-    setStatus("");
     try {
       const data = await getOrderHistory(historyUserId.trim());
       setOrders(data || []);
-      setStatus(`[SUCCESS] History loaded (${data ? data.length : 0} orders)`);
+      pushLog("success", `History loaded (${data ? data.length : 0} orders).`);
     } catch (err) {
-      setStatus(`[ERROR] ${err.message || "Could not load history."}`);
+      pushLog("error", err.message || "Could not load history.");
       setOrders([]);
     } finally {
       setBusy("");
@@ -81,110 +84,101 @@ export default function AdminOrders() {
   };
 
   return (
-    <div className="layout">
-      <Sidebar type="admin" />
-      <div className="main-content">
-        <div className="page-title">Orders Management</div>
+    <PageShell type="admin" eyebrow="Ops Console" title="Orders Management">
+      <div className="grid gap-6 lg:grid-cols-2">
+        <Card title="Create order">
+          <div className="space-y-4">
+            <Field name="userId" label="User ID" placeholder="USER-1001" value={form.userId} onChange={onChange} />
+            <Field name="productId" label="Product ID" placeholder="PROD-1001" value={form.productId} onChange={onChange} />
+            <div className="grid grid-cols-2 gap-3">
+              <Field name="quantity" type="number" label="Quantity" placeholder="1" value={form.quantity} onChange={onChange} />
+              <Field name="totalAmount" type="number" label="Total amount" placeholder="0.00" value={form.totalAmount} onChange={onChange} />
+            </div>
+            <Button variant="brand" onClick={create} disabled={busy === "create"} className="w-full">
+              {busy === "create" ? "Creating…" : "Create order"}
+            </Button>
+          </div>
+        </Card>
 
-        <div className="card">
-          <h3>Create Order</h3>
-          <input
-            name="userId"
-            placeholder="User ID"
-            value={form.userId}
-            onChange={onChange}
-          />
-          <input
-            name="productId"
-            placeholder="Product ID"
-            value={form.productId}
-            onChange={onChange}
-          />
-          <input
-            name="quantity"
-            type="number"
-            placeholder="Quantity"
-            value={form.quantity}
-            onChange={onChange}
-          />
-          <input
-            name="totalAmount"
-            type="number"
-            placeholder="Total Amount"
-            value={form.totalAmount}
-            onChange={onChange}
-          />
-          <button onClick={create} disabled={busy === "create"}>
-            {busy === "create" ? "Creating..." : "Create Order"}
-          </button>
-        </div>
+        <Card title="Cancel order">
+          <div className="space-y-4">
+            <Field label="Order ID" placeholder="ORD-1001" value={cancelId} onChange={(e) => setCancelId(e.target.value)} />
+            <Button variant="danger" onClick={cancel} disabled={busy === "cancel"} className="w-full">
+              {busy === "cancel" ? "Cancelling…" : "Cancel order"}
+            </Button>
+          </div>
+        </Card>
+      </div>
 
-        <div className="card" style={{ marginTop: 20 }}>
-          <h3>Cancel Order</h3>
-          <input
-            placeholder="Order ID"
-            value={cancelId}
-            onChange={(e) => setCancelId(e.target.value)}
-          />
-          <button onClick={cancel} disabled={busy === "cancel"}>
-            {busy === "cancel" ? "Cancelling..." : "Cancel Order"}
-          </button>
-        </div>
-
-        <div className="card" style={{ marginTop: 20 }}>
-          <h3>Order History</h3>
-          <input
-            placeholder="User ID"
+      <Card title="Order history" subtitle="Look up all orders for a given user" className="mt-6">
+        <div className="mb-5 flex flex-wrap items-end gap-3">
+          <Field
+            label="User ID"
+            placeholder="USER-1001"
             value={historyUserId}
             onChange={(e) => setHistoryUserId(e.target.value)}
+            className="max-w-xs flex-1"
           />
-          <button onClick={loadHistory} disabled={busy === "history"}>
-            {busy === "history" ? "Loading..." : "Load History"}
-          </button>
+          <Button variant="outline" onClick={loadHistory} disabled={busy === "history"}>
+            {busy === "history" ? "Loading…" : "Load history"}
+          </Button>
+        </div>
 
-          <table
-            style={{ width: "100%", borderCollapse: "collapse", marginTop: 16 }}
-          >
+        <div className="overflow-x-auto">
+          <table className="w-full border-collapse text-sm">
             <thead>
-              <tr style={{ textAlign: "left", borderBottom: "1px solid #eee" }}>
-                <th style={{ padding: 8 }}>Order ID</th>
-                <th style={{ padding: 8 }}>User ID</th>
-                <th style={{ padding: 8 }}>Amount</th>
-                <th style={{ padding: 8 }}>Status</th>
-                <th style={{ padding: 8 }}>Payment ID</th>
-                <th style={{ padding: 8 }}>Created</th>
+              <tr className="border-b border-ink-900/10 text-left text-xs uppercase tracking-wide text-ink-600/60">
+                <th className="py-2.5 pr-4 font-medium">Order</th>
+                <th className="py-2.5 pr-4 font-medium">User</th>
+                <th className="py-2.5 pr-4 font-medium">Amount</th>
+                <th className="py-2.5 pr-4 font-medium">Status</th>
+                <th className="py-2.5 pr-4 font-medium">Payment</th>
+                <th className="py-2.5 pr-4 font-medium">Created</th>
               </tr>
             </thead>
             <tbody>
               {orders.length === 0 ? (
                 <tr>
-                  <td style={{ padding: 8 }} colSpan={6}>
+                  <td className="py-6 text-ink-600/60" colSpan={6}>
                     No orders loaded.
                   </td>
                 </tr>
               ) : (
                 orders.map((o) => (
-                  <tr
-                    key={o.orderId}
-                    style={{ borderBottom: "1px solid #f3f4f6" }}
-                  >
-                    <td style={{ padding: 8 }}>{o.orderId}</td>
-                    <td style={{ padding: 8 }}>{o.userId}</td>
-                    <td style={{ padding: 8 }}>₹{o.totalAmount}</td>
-                    <td style={{ padding: 8 }}>{o.status}</td>
-                    <td style={{ padding: 8 }}>{o.paymentId || "-"}</td>
-                    <td style={{ padding: 8 }}>{o.createdDate}</td>
+                  <tr key={o.orderId} className="border-b border-ink-900/5 last:border-0">
+                    <td className="py-3 pr-4"><IdTag>{o.orderId}</IdTag></td>
+                    <td className="py-3 pr-4"><IdTag>{o.userId}</IdTag></td>
+                    <td className="py-3 pr-4 font-mono text-ink-900">₹{o.totalAmount}</td>
+                    <td className="py-3 pr-4"><StatusBadge status={o.status} /></td>
+                    <td className="py-3 pr-4">{o.paymentId ? <IdTag>{o.paymentId}</IdTag> : "—"}</td>
+                    <td className="py-3 pr-4 text-ink-600">{o.createdDate}</td>
                   </tr>
                 ))
               )}
             </tbody>
           </table>
         </div>
+      </Card>
 
-        <div className="console" style={{ marginTop: 20 }}>
-          {status}
+      <div className="mt-6 rounded-2xl bg-ink-900 p-5 font-mono text-xs">
+        <p className="mb-2 text-[11px] uppercase tracking-[0.2em] text-white/30">Console</p>
+        <div className="space-y-1.5">
+          {log.map((entry, i) => (
+            <p
+              key={i}
+              className={
+                entry.level === "error"
+                  ? "text-red-400"
+                  : entry.level === "success"
+                  ? "text-emerald-400"
+                  : "text-white/50"
+              }
+            >
+              {entry.level === "error" ? "✕" : entry.level === "success" ? "✓" : "›"} {entry.text}
+            </p>
+          ))}
         </div>
       </div>
-    </div>
+    </PageShell>
   );
 }
