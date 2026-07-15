@@ -170,7 +170,7 @@ try {
 
     ex.printStackTrace();
 
-    throw ex;
+    verified = false;
 }
 
 //razorpay integration 12th june
