@@ -13,7 +13,11 @@ import { getToken } from "../auth/session";
  * as HTTP 200 with { success: false, data: null }, so apiRequest does NOT throw.
  * We detect the failed envelope here and throw its message instead of returning
  * a null order.
- * @param {{userId, productId, quantity, totalAmount}} payload
+ *
+ * Payment happens BEFORE order creation (see CustomerOrders): pass the
+ * paymentMethod ("RAZORPAY" | "WALLET") and the paymentId returned by the
+ * payment service so the backend can attach it to the confirmed order.
+ * @param {{userId, productId, quantity, totalAmount, paymentMethod, paymentId}} payload
  * @returns {Promise<{orderId, status, message}>}
  */
 export async function createOrder(payload) {
@@ -41,6 +45,18 @@ export async function cancelOrder(orderId) {
 }
 
 /**
+ * GET /orders/stock/check — true if the product has at least `quantity` units.
+ * Returns a raw boolean (no ApiResponse envelope).
+ * @returns {Promise<boolean>}
+ */
+export async function checkStock(productId, quantity) {
+  return apiRequest(
+    `/orders/stock/check?productId=${encodeURIComponent(productId)}&quantity=${quantity}`,
+    { token: getToken() }
+  );
+}
+
+/**
  * GET /orders/history/{userId} — order history for a user.
  * @returns {Promise<Array<{orderId, userId, totalAmount, status, createdDate, updatedDate, paymentId}>>}
  */
@@ -49,5 +65,14 @@ export async function getOrderHistory(userId) {
     `/orders/history/${encodeURIComponent(userId)}`,
     { token: getToken() }
   );
+  return unwrap(res);
+}
+
+/**
+ * GET /orders/all — every order across all users (admin). Newest first.
+ * @returns {Promise<Array<{orderId, userId, totalAmount, status, createdDate, updatedDate, paymentId}>>}
+ */
+export async function getAllOrders() {
+  const res = await apiRequest("/orders/all", { token: getToken() });
   return unwrap(res);
 }

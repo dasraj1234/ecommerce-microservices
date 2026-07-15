@@ -19,10 +19,14 @@ public class JwtUtil {
     // SecretKey, not Key
     private final SecretKey key = Keys.hmacShaKeyFor(SECRET.getBytes());
 
-    public String generateToken(String username, String role) {
-        return Jwts.builder()
+    public String generateToken(String username, String role, String userId) {
+        var builder = Jwts.builder()
                 .subject(username)
-                .claim("role", role)                            // embed role in the signed token
+                .claim("role", role);                           // embed role in the signed token
+        if (userId != null) {
+            builder.claim("userId", userId);                    // business id (USER-1001) for order/payment services
+        }
+        return builder
                 .issuedAt(new Date())
                 .expiration(
                         new Date(System.currentTimeMillis() + EXPIRATION_TIME)

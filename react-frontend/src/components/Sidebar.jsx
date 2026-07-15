@@ -1,4 +1,4 @@
-import { Link, useNavigate } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import { clearSession } from "../auth/session";
 
 export default function Sidebar({ type }) {
@@ -28,9 +28,9 @@ export default function Sidebar({ type }) {
       <div className="logo">{admin ? "ADMIN" : "CUSTOMER"}</div>
       <div className="menu-title">{admin ? "Dashboard" : "Shopping"}</div>
       {items.map(([to, label]) => (
-        <Link key={to} to={to}>
+        <NavLink key={to} to={to}>
           {label}
-        </Link>
+        </NavLink>
       ))}
       <hr />
       <a href="/" onClick={(e) => { e.preventDefault(); handleLogout(); }}>

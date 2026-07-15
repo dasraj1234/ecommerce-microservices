@@ -1,22 +1,50 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Sidebar from "../../components/Sidebar";
-import { createOrder, cancelOrder, getOrderHistory } from "../../api/orders";
+import {
+  createOrder,
+  cancelOrder,
+  getOrderHistory,
+  getAllOrders,
+} from "../../api/orders";
 
 // Admin order management.
 // Backend: POST /orders/create, PATCH /orders/{id}/cancel,
-//          GET /orders/history/{userId}  (product-order @ :8082)
+//          GET /orders/all, GET /orders/history/{userId}  (product-order @ :8082)
 const EMPTY_ORDER = { userId: "", productId: "", quantity: "", totalAmount: "" };
 
 export default function AdminOrders() {
   const [form, setForm] = useState(EMPTY_ORDER);
   const [cancelId, setCancelId] = useState("");
   const [historyUserId, setHistoryUserId] = useState("");
-  const [orders, setOrders] = useState([]);
-  const [status, setStatus] = useState("[INFO] Orders Console Ready");
+  const [orders, setOrders] = useState(null); // null = not yet loaded
+  const [status, setStatus] = useState("");
   const [busy, setBusy] = useState("");
 
   const onChange = (e) =>
     setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
+
+  // Load orders: all users when the filter is blank, else that user's history.
+  const loadOrders = async () => {
+    setBusy("orders");
+    setStatus("");
+    try {
+      const data = historyUserId.trim()
+        ? await getOrderHistory(historyUserId.trim())
+        : await getAllOrders();
+      setOrders(data || []);
+    } catch (err) {
+      setStatus(`[ERROR] ${err.message || "Could not load orders."}`);
+      setOrders([]);
+    } finally {
+      setBusy("");
+    }
+  };
+
+  // Auto-load all orders when the page opens.
+  useEffect(() => {
+    loadOrders();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const create = async () => {
     if (!form.userId.trim() || !form.productId.trim()) {
@@ -34,6 +62,7 @@ export default function AdminOrders() {
       });
       setStatus(`[SUCCESS] Order placed — ${result.orderId} (${result.status})`);
       setForm(EMPTY_ORDER);
+      loadOrders();
     } catch (err) {
       setStatus(`[ERROR] ${err.message || "Could not create order."}`);
     } finally {
@@ -52,29 +81,9 @@ export default function AdminOrders() {
       const result = await cancelOrder(cancelId.trim());
       setStatus(`[SUCCESS] Order ${result.orderId} — ${result.status}`);
       setCancelId("");
-      // Refresh history if we're viewing the same user's orders.
-      if (historyUserId.trim()) loadHistory();
+      loadOrders(); // reflect the new status in the table
     } catch (err) {
       setStatus(`[ERROR] ${err.message || "Could not cancel order."}`);
-    } finally {
-      setBusy("");
-    }
-  };
-
-  const loadHistory = async () => {
-    if (!historyUserId.trim()) {
-      setStatus("[ERROR] Enter a user id to load history.");
-      return;
-    }
-    setBusy("history");
-    setStatus("");
-    try {
-      const data = await getOrderHistory(historyUserId.trim());
-      setOrders(data || []);
-      setStatus(`[SUCCESS] History loaded (${data ? data.length : 0} orders)`);
-    } catch (err) {
-      setStatus(`[ERROR] ${err.message || "Could not load history."}`);
-      setOrders([]);
     } finally {
       setBusy("");
     }
@@ -85,6 +94,18 @@ export default function AdminOrders() {
       <Sidebar type="admin" />
       <div className="main-content">
         <div className="page-title">Orders Management</div>
+
+        {status && (
+          <p
+            style={{
+              marginBottom: 16,
+              fontWeight: 600,
+              color: status.startsWith("[ERROR]") ? "#dc2626" : "#16a34a",
+            }}
+          >
+            {status.replace(/^\[(ERROR|SUCCESS|INFO)\]\s*/, "")}
+          </p>
+        )}
 
         <div className="card">
           <h3>Create Order</h3>
@@ -132,15 +153,45 @@ export default function AdminOrders() {
         </div>
 
         <div className="card" style={{ marginTop: 20 }}>
-          <h3>Order History</h3>
-          <input
-            placeholder="User ID"
-            value={historyUserId}
-            onChange={(e) => setHistoryUserId(e.target.value)}
-          />
-          <button onClick={loadHistory} disabled={busy === "history"}>
-            {busy === "history" ? "Loading..." : "Load History"}
-          </button>
+          <h3>
+            All Orders
+            {orders && (
+              <span style={{ fontWeight: 400, color: "#6b7280", fontSize: 14 }}>
+                {" "}
+                ({orders.length})
+              </span>
+            )}
+          </h3>
+
+          <div style={{ display: "flex", gap: 10, alignItems: "flex-start" }}>
+            <input
+              placeholder="Filter by User ID (blank = all)"
+              value={historyUserId}
+              onChange={(e) => setHistoryUserId(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && loadOrders()}
+              style={{ flex: 1 }}
+            />
+            <button
+              onClick={loadOrders}
+              disabled={busy === "orders"}
+              style={{ marginTop: 12 }}
+            >
+              {busy === "orders" ? "Loading..." : historyUserId.trim() ? "Filter" : "Refresh"}
+            </button>
+            {historyUserId.trim() && (
+              <button
+                onClick={() => {
+                  setHistoryUserId("");
+                  // load all after clearing (state update is async, so pass through)
+                  setTimeout(loadOrders, 0);
+                }}
+                disabled={busy === "orders"}
+                style={{ marginTop: 12, background: "#e5e7eb", color: "#374151" }}
+              >
+                Clear
+              </button>
+            )}
+          </div>
 
           <table
             style={{ width: "100%", borderCollapse: "collapse", marginTop: 16 }}
@@ -156,10 +207,16 @@ export default function AdminOrders() {
               </tr>
             </thead>
             <tbody>
-              {orders.length === 0 ? (
+              {orders === null ? (
                 <tr>
                   <td style={{ padding: 8 }} colSpan={6}>
-                    No orders loaded.
+                    Loading orders...
+                  </td>
+                </tr>
+              ) : orders.length === 0 ? (
+                <tr>
+                  <td style={{ padding: 8 }} colSpan={6}>
+                    No orders found.
                   </td>
                 </tr>
               ) : (
@@ -181,9 +238,6 @@ export default function AdminOrders() {
           </table>
         </div>
 
-        <div className="console" style={{ marginTop: 20 }}>
-          {status}
-        </div>
       </div>
     </div>
   );

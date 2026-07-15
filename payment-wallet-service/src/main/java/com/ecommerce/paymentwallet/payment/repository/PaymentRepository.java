@@ -85,6 +85,19 @@ public void insert(String paymentId, String orderId, String userId,
         return count != null && count > 0;
     }
 
+    // Total number of payments (admin dashboard KPI).
+    public long countAll() {
+
+        String sql = "SELECT COUNT(*) FROM payments";
+
+        Long count = jdbcTemplate.queryForObject(
+                sql,
+                Long.class
+        );
+
+        return count != null ? count : 0L;
+    }
+
     // 🔥 FIX: Required for ReconciliationScheduler
 // 🔥 FIX: Match scheduler expectation
 public List<Map<String, Object>> findByStatus(String status) {
@@ -133,6 +146,37 @@ p.setCreatedDate(
     );
 }
 
+// Shared mapping for payment rows — used by per-user history and the admin
+// all-payments listing.
+private final org.springframework.jdbc.core.RowMapper<PaymentDetailsResponse> paymentRowMapper =
+        (rs, rowNum) -> {
+
+            PaymentDetailsResponse p =
+                    new PaymentDetailsResponse();
+
+            p.setPaymentId(
+                    rs.getString("payment_id"));
+
+            p.setOrderId(
+                    rs.getString("order_id"));
+
+            p.setUserId(
+                    rs.getString("user_id"));
+
+            p.setAmount(
+                    rs.getDouble("amount"));
+
+            p.setStatus(
+                    rs.getString("status"));
+
+            p.setCreatedDate(
+                    formatDate(
+                            rs.getTimestamp("created_date")
+                    )
+            );
+            return p;
+        };
+
 public List<PaymentDetailsResponse> findByUserId(
         String userId) {
 
@@ -141,34 +185,20 @@ public List<PaymentDetailsResponse> findByUserId(
 
     return jdbcTemplate.query(
             sql,
-            (rs,rowNum)->{
-
-                PaymentDetailsResponse p =
-                        new PaymentDetailsResponse();
-
-                p.setPaymentId(
-                        rs.getString("payment_id"));
-
-                p.setOrderId(
-                        rs.getString("order_id"));
-
-                p.setUserId(
-                        rs.getString("user_id"));
-
-                p.setAmount(
-                        rs.getDouble("amount"));
-
-                p.setStatus(
-                        rs.getString("status"));
-
-p.setCreatedDate(
-        formatDate(
-                rs.getTimestamp("created_date")
-        )
-);
-                return p;
-            },
+            paymentRowMapper,
             userId
+    );
+}
+
+// Admin: every payment across all users, newest first.
+public List<PaymentDetailsResponse> findAll() {
+
+    String sql =
+            "SELECT * FROM payments ORDER BY created_date DESC";
+
+    return jdbcTemplate.query(
+            sql,
+            paymentRowMapper
     );
 }
 

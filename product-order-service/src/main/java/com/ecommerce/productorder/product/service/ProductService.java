@@ -3,6 +3,7 @@ package com.ecommerce.productorder.product.service;
 import com.ecommerce.productorder.common.util.IdGenerator;
 import com.ecommerce.productorder.product.dto.ProductRequest;
 import com.ecommerce.productorder.product.dto.ProductResponse;
+import com.ecommerce.productorder.product.dto.ProductUpdateRequest;
 import com.ecommerce.productorder.product.repository.ProductRepository;
 
 import org.springframework.stereotype.Service;
@@ -76,6 +77,28 @@ public String deleteProduct(
     }
 
     return "Product deleted successfully";
+}
+
+public String updateProduct(
+        String productId,
+        ProductUpdateRequest request) {
+
+    int rows =
+            repository.updateById(
+                    productId,
+                    request.getProductName(),
+                    request.getPrice(),
+                    request.getStock()
+            );
+
+    if(rows==0){
+
+        throw new IllegalArgumentException(
+                "Product not found"
+        );
+    }
+
+    return "Product updated successfully";
 }
 
 }

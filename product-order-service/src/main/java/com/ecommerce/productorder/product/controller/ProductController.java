@@ -3,6 +3,7 @@ package com.ecommerce.productorder.product.controller;
 import com.ecommerce.productorder.common.dto.ApiResponse;
 import com.ecommerce.productorder.product.dto.ProductRequest;
 import com.ecommerce.productorder.product.dto.ProductResponse;
+import com.ecommerce.productorder.product.dto.ProductUpdateRequest;
 import com.ecommerce.productorder.product.service.ProductService;
 import jakarta.validation.Valid;
 import io.swagger.v3.oas.annotations.Operation;
@@ -70,6 +71,18 @@ public ApiResponse<String> deleteProduct(
 
     return ApiResponse.success(
             service.deleteProduct(productId),
+            productId
+    );
+}
+
+@Operation(summary = "Update product name, price and stock")
+@PutMapping("/{productId}")
+public ApiResponse<String> updateProduct(
+        @PathVariable String productId,
+        @Valid @RequestBody ProductUpdateRequest request) {
+
+    return ApiResponse.success(
+            service.updateProduct(productId, request),
             productId
     );
 }

@@ -24,12 +24,30 @@ export default function Login() {
     setLoading(true);
     try {
       const data = await login(form);
+
+      // Which portal did they come through? The guard remembers the intended
+      // path in location.state.from (e.g. /customer/home or /admin/dashboard).
+      const from = location.state?.from?.pathname;
+      const requiredRole = from
+        ? from.startsWith("/admin")
+          ? "ADMIN"
+          : from.startsWith("/customer")
+            ? "USER"
+            : null
+        : null;
+
+      // If they used a portal-specific login (e.g. Customer) but the account is
+      // for the other role (e.g. ADMIN), reject with the same message as a wrong
+      // password — don't sign them in as the other role, and don't reveal that
+      // the account exists.
+      if (requiredRole && data.role !== requiredRole) {
+        setError("Invalid username or password");
+        return;
+      }
+
       setSession(data);
       // Return to the page the guard redirected from — but only if it belongs to
-      // this user's role area; otherwise a customer who hit an /admin route (or
-      // vice versa) would be sent to a page their role can't view. Fall back to
-      // the role's own home in that case.
-      const from = location.state?.from?.pathname;
+      // this user's role area; otherwise fall back to the role's own home.
       const roleHome = homeForRole(data.role);
       const dest = from && from.startsWith(roleAreaPrefix(data.role)) ? from : roleHome;
       navigate(dest, { replace: true });
