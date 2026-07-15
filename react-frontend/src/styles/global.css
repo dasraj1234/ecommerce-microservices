@@ -83,7 +83,22 @@ button {
 }
 
 .sidebar a {
+  color: #cbd5e1;
+  padding: 10px 14px;
+  border-radius: 10px;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.sidebar a:hover {
+  background: rgba(255, 255, 255, 0.08);
   color: #fff;
+}
+
+/* Current page — lighter pill so the active tab is obvious. */
+.sidebar a.active {
+  background: rgba(255, 255, 255, 0.16);
+  color: #fff;
+  font-weight: 600;
 }
 
 .main-content {

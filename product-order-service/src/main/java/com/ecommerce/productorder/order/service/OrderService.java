@@ -343,6 +343,11 @@ public boolean hasStock(
         return orderRepository.findHistoryByUserId(userId);
     }
 
+    public List<OrderHistoryResponse> allOrders() {
+
+        return orderRepository.findAllOrders();
+    }
+
     public OrderResponse updateStatus(String orderId, OrderStatus status) {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'updateStatus'");

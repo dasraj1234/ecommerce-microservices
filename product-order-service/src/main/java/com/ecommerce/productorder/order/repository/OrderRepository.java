@@ -4,6 +4,7 @@ import com.ecommerce.productorder.order.dto.OrderHistoryResponse;
 import com.ecommerce.productorder.order.dto.OrderRequest;
 import com.ecommerce.productorder.sql.SqlQueries;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 import java.sql.Timestamp;
 import java.time.format.DateTimeFormatter;
@@ -88,35 +89,50 @@ public class OrderRepository {
         return statuses.stream().findFirst();
     }
 
+    // Shared mapping for order rows — used by both history (per-user) and the
+    // admin all-orders listing, which select the same columns.
+    private static final RowMapper<OrderHistoryResponse> ORDER_ROW_MAPPER =
+            (rs, rowNum) -> {
+                OrderHistoryResponse history = new OrderHistoryResponse();
+                history.setOrderId(rs.getString("order_id"));
+                history.setUserId(rs.getString("user_id"));
+                history.setTotalAmount(rs.getDouble("total_amount"));
+                history.setStatus(rs.getString("status"));
+                history.setPaymentId(rs.getString("payment_id"));  //improvements 14th june
+                Timestamp timestamp = rs.getTimestamp("created_date");
+
+                DateTimeFormatter formatter =
+                        DateTimeFormatter.ofPattern(
+                                "d MMMM yyyy, hh:mm a"
+                        );
+
+                history.setCreatedDate(
+                        timestamp.toLocalDateTime()
+                                 .format(formatter)
+                );
+                history.setUpdatedDate(rs.getTimestamp("updated_date").toString());
+                return history;
+            };
+
     public List<OrderHistoryResponse> findHistoryByUserId(String userId) {
 
         return jdbcTemplate.query(
 
                 SqlQueries.FIND_ORDER_HISTORY,
 
-                (rs, rowNum) -> {
-                    OrderHistoryResponse history = new OrderHistoryResponse();
-                    history.setOrderId(rs.getString("order_id"));
-                    history.setUserId(rs.getString("user_id"));
-                    history.setTotalAmount(rs.getDouble("total_amount"));
-                    history.setStatus(rs.getString("status"));
-                    history.setPaymentId(rs.getString("payment_id"));  //improvements 14th june
-                    Timestamp timestamp = rs.getTimestamp("created_date");
-
-DateTimeFormatter formatter =
-        DateTimeFormatter.ofPattern(
-                "d MMMM yyyy, hh:mm a"
-        );
-
-history.setCreatedDate(
-        timestamp.toLocalDateTime()
-                 .format(formatter)
-);
-                    history.setUpdatedDate(rs.getTimestamp("updated_date").toString());
-                    return history;
-                },
+                ORDER_ROW_MAPPER,
 
                 userId
+        );
+    }
+
+    public List<OrderHistoryResponse> findAllOrders() {
+
+        return jdbcTemplate.query(
+
+                SqlQueries.FIND_ALL_ORDERS,
+
+                ORDER_ROW_MAPPER
         );
     }
 

@@ -1,29 +1,27 @@
 import { useEffect, useState } from "react";
 import Sidebar from "../../components/Sidebar";
 import { getUserPayments } from "../../api/payments";
-import { getUserId, setUserId } from "../../auth/session";
+import { getUserId } from "../../auth/session";
 
 // Payment history for the logged-in customer.
 // Backend: GET /payments/user/{userId}  (payment-wallet-service @ :8083)
 //
-// userId is the business id (USER-1001). Until the username -> USER-xxxx mapping
-// endpoint exists (TASK R3), it's entered manually and cached in the session.
+// userId is the business id (USER-1001), decoded from the signed JWT claim.
 export default function CustomerPayments() {
-  const [userId, setUserIdInput] = useState(getUserId() || "");
+  const userId = getUserId();
   const [payments, setPayments] = useState(null);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const load = async (id) => {
-    if (!id) {
-      setError("Enter your user id (e.g. USER-1001).");
+  const load = async () => {
+    if (!userId) {
+      setError("Could not determine your account id. Please log out and log back in.");
       return;
     }
     setError("");
     setLoading(true);
     try {
-      setUserId(id); // remember for other pages
-      const data = await getUserPayments(id);
+      const data = await getUserPayments(userId);
       setPayments(data || []);
     } catch (err) {
       setError(err.message || "Could not load payments.");
@@ -33,9 +31,8 @@ export default function CustomerPayments() {
     }
   };
 
-  // Auto-load if we already know the user's business id.
   useEffect(() => {
-    if (userId) load(userId);
+    load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -45,17 +42,12 @@ export default function CustomerPayments() {
       <div className="main-content">
         <h1>Payment History</h1>
 
-        <div className="card">
-          <input
-            placeholder="USER-1001"
-            value={userId}
-            onChange={(e) => setUserIdInput(e.target.value)}
-          />
-          <button onClick={() => load(userId)} disabled={loading}>
-            {loading ? "Loading..." : "Load Payments"}
-          </button>
-          {error && <p style={{ color: "#dc2626", marginTop: 12 }}>{error}</p>}
-        </div>
+        {(loading || error) && (
+          <div className="card">
+            {loading && <p>Loading payments...</p>}
+            {error && <p style={{ color: "#dc2626" }}>{error}</p>}
+          </div>
+        )}
 
         {payments && (
           <div className="card" style={{ marginTop: 20 }}>

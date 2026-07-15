@@ -23,10 +23,15 @@ public class User {
     // so seed data in ecommerce_db.sql can insert plain UUID strings.
     @JdbcTypeCode(SqlTypes.VARCHAR)
     private UUID id;
-    private String username;  
+    private String username;
     private String password;
     private String email;
     private String role;
-    
+
+    // Business id (e.g. USER-1001) that order/payment/wallet services key on.
+    // Null for ADMIN accounts, which never place orders or hold a wallet.
+    @jakarta.persistence.Column(unique = true)
+    private String userId;
+
     private LocalDate createdAt;
 }

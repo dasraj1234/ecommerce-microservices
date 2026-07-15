@@ -88,6 +88,17 @@ public ApiResponse<OrderResponse> updateStatus(
         );
     }
 
+    @Operation(summary = "Get all orders (admin)")
+    @GetMapping("/all")
+
+    public ApiResponse<List<OrderHistoryResponse>> allOrders() {
+
+        return ApiResponse.success(
+                "All orders fetched successfully",
+                service.allOrders()
+        );
+    }
+
     //razorpay integration 12th june
     @GetMapping("/stock/check")
 public boolean checkStock(

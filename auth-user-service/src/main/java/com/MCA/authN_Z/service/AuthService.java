@@ -9,6 +9,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import com.MCA.authN_Z.dto.LoginRequest;
 import com.MCA.authN_Z.dto.LoginResponse;
 import com.MCA.authN_Z.exception.InvalidCredentialsException;
+import com.MCA.authN_Z.service.UserService;
 import com.MCA.authN_Z.utill.JwtUtil;
 @Service
 public class AuthService {
@@ -17,6 +18,9 @@ public class AuthService {
 
     @Autowired
     private JwtUtil jwtUtil;
+
+    @Autowired
+    private UserService userService;
 
     public LoginResponse login(LoginRequest request) {
         Authentication authN = authManager.authenticate(
@@ -32,14 +36,16 @@ public class AuthService {
                            .findFirst()
                            .get()
                            .getAuthority();
-            String token = jwtUtil.generateToken(request.getUsername(), role);
+            String userId = userService.getUserByUsername(request.getUsername()).getUserId();
+            String token = jwtUtil.generateToken(request.getUsername(), role, userId);
             return new LoginResponse(
                 token,
                 request.getUsername(),
-                role
+                role,
+                userId
             );
         } else {
             throw new InvalidCredentialsException("Invalid username or password");
         }
-    }  
+    }
 }

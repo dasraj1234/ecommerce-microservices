@@ -13,7 +13,7 @@ services:
     volumes:
       - mysqldata:/var/lib/mysql
       # Auto-runs on FIRST init only (when the data volume is empty).
-      - ./ecommerce_db.sql:/docker-entrypoint-initdb.d/ecommerce_db.sql
+      - ./ecommerce_db_11thjuly_docker.sql:/docker-entrypoint-initdb.d/ecommerce_db.sql
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-prootpassword"]
       interval: 10s

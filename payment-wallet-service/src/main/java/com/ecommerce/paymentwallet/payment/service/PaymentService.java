@@ -225,4 +225,14 @@ if ("WALLET".equalsIgnoreCase(req.getPaymentMethod())) {
                 userId
         );
     }
+
+    public long countPayments() {
+
+        return paymentRepo.countAll();
+    }
+
+    public List<PaymentDetailsResponse> getAllPayments() {
+
+        return paymentRepo.findAll();
+    }
 }
