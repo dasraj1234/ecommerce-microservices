@@ -13,10 +13,14 @@ import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import com.ecommerce.paymentwallet.payment.repository.PaymentRepository; //added for verify payment api - razorpay integration 12th june
+import com.ecommerce.paymentwallet.payment.repository.PaymentRepository;
 import com.ecommerce.paymentwallet.payment.repository.PaymentLogRepository;
-import com.ecommerce.paymentwallet.common.util.IdGenerator; //added for verify payment api - razorpay integration 12th june
+import com.ecommerce.paymentwallet.common.util.IdGenerator;
 import com.ecommerce.paymentwallet.common.util.JsonUtil;
+import com.ecommerce.paymentwallet.kafka.event.PaymentEvent;
+import com.ecommerce.paymentwallet.kafka.producer.PaymentEventProducer;
+
+import java.time.LocalDateTime;
 import com.ecommerce.paymentwallet.notification.dto.CustomerContact;
 import com.ecommerce.paymentwallet.notification.service.CustomerContactService;
 import com.ecommerce.paymentwallet.notification.service.NotificationService;
@@ -41,6 +45,8 @@ public class RazorpayService {
     private final CustomerContactService customerContactService;
 
     private final NotificationService notificationService;
+
+    private final PaymentEventProducer eventProducer;
 
     
     @Value("${razorpay.key.id}")
@@ -194,6 +200,11 @@ if (verified) {
 System.out.println(
         "PAYMENT SAVED TO DB"
 );
+
+eventProducer.publishPaymentEvent(new PaymentEvent(
+        paymentId, request.getUserId(), request.getAmount(),
+        "RAZORPAY", "SUCCESS", LocalDateTime.now()
+));
 
 logRepository.log(
         paymentId,

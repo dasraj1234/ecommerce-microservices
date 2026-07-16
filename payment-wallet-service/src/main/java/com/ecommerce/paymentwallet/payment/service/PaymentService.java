@@ -7,7 +7,10 @@ import com.ecommerce.paymentwallet.payment.repository.PaymentLogRepository;
 import com.ecommerce.paymentwallet.common.util.IdGenerator;
 import com.ecommerce.paymentwallet.common.util.JsonUtil;
 import com.ecommerce.paymentwallet.common.exception.BadRequestException;
+import com.ecommerce.paymentwallet.kafka.event.PaymentEvent;
+import com.ecommerce.paymentwallet.kafka.producer.PaymentEventProducer;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import lombok.RequiredArgsConstructor;
@@ -26,6 +29,8 @@ public class PaymentService {
     private final PaymentLogRepository logRepo;
 
     private final IdGenerator idGenerator;
+
+    private final PaymentEventProducer eventProducer;
 
     public PaymentResponse processPayment(
             PaymentRequest req) {
@@ -174,6 +179,11 @@ if ("WALLET".equalsIgnoreCase(req.getPaymentMethod())) {
                     "SUCCESS",
                     "PAYMENT_SUCCESS"
             );
+
+            eventProducer.publishPaymentEvent(new PaymentEvent(
+                    paymentId, req.getUserId(), req.getAmount(),
+                    req.getPaymentMethod(), "SUCCESS", LocalDateTime.now()
+            ));
 
             return response;
 

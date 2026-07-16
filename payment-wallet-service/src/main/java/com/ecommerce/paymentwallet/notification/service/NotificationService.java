@@ -62,4 +62,24 @@ public class NotificationService {
 
         mailSender.send(message);
     }
+
+    public void sendFraudAlertMail(String userId, String reason, double amount) {
+
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setFrom(fromEmail);
+        message.setTo(fromEmail);
+
+        message.setSubject("⚠️ FRAUD ALERT — Wallet Blocked: " + userId);
+
+        message.setText(
+                "Fraud detected and wallet blocked.\n\n"
+                + "User ID  : " + userId + "\n"
+                + "Reason   : " + reason + "\n"
+                + "Amount   : ₹" + amount + "\n\n"
+                + "The wallet has been automatically blocked. "
+                + "Please review and take action."
+        );
+
+        mailSender.send(message);
+    }
 }
