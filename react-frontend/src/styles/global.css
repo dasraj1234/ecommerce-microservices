@@ -2,131 +2,60 @@
 @tailwind components;
 @tailwind utilities;
 
-* {
-  box-sizing: border-box;
+html,
+body,
+#root {
+  height: 100%;
 }
 
 body {
-  margin: 0;
-  font-family: Arial, sans-serif;
-  background: #f5f7fb;
-  color: #222;
+  @apply bg-paper font-body text-ink-900 antialiased;
 }
 
-a {
-  text-decoration: none;
+/* Signature element: IDs throughout the app (orders, products, payments,
+   users) render as a small "manifest tag" — a mono-font stub with a
+   dashed perforation edge, like a torn ticket. Ties the whole system's
+   many generated IDs back to the shipping/inventory domain instead of
+   letting them read as raw database keys. */
+.id-tag {
+  @apply relative inline-flex items-center gap-1 rounded-r-md rounded-l-sm border border-ink-700/15 bg-ink-900/[0.03] py-1 pl-3 pr-2 font-mono text-xs font-medium tracking-tight text-ink-800;
+  border-left: 2px dashed rgba(23, 25, 35, 0.35);
 }
 
-.landing-wrap {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
+.status-dot {
+  @apply relative inline-block h-2 w-2 rounded-full;
 }
 
-.container {
-  width: 900px;
+.status-dot::after {
+  content: "";
+  @apply absolute inset-0 rounded-full;
+  animation: pulse-ring 2.2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  background: inherit;
 }
 
-.topbar,
-.console,
-.card,
-.portal-card,
-.kpi-card {
-  background: #fff;
-  padding: 20px;
-  border-radius: 20px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+@keyframes pulse-ring {
+  0% {
+    transform: scale(1);
+    opacity: 0.6;
+  }
+  100% {
+    transform: scale(2.4);
+    opacity: 0;
+  }
 }
 
-.console {
-  margin: 20px 0;
+@media (prefers-reduced-motion: reduce) {
+  .status-dot::after {
+    animation: none;
+    display: none;
+  }
 }
 
-.portal-grid,
-.kpi-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 30px;
+/* Scrollbar tuned to match the ink sidebar */
+.sidebar-scroll::-webkit-scrollbar {
+  width: 6px;
 }
-
-.portal-card {
-  text-align: center;
-  padding: 40px;
-}
-
-.portal-card a,
-button {
-  display: inline-block;
-  margin-top: 20px;
-  padding: 12px 25px;
-  background: #ff8c32;
-  color: #fff;
-  border: none;
-  border-radius: 10px;
-  cursor: pointer;
-}
-
-.layout {
-  display: flex;
-  min-height: 100vh;
-}
-
-.sidebar {
-  width: 260px;
-  background: #1f2937;
-  color: #fff;
-  padding: 24px;
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-}
-
-.sidebar a {
-  color: #cbd5e1;
-  padding: 10px 14px;
-  border-radius: 10px;
-  transition: background 0.15s ease, color 0.15s ease;
-}
-
-.sidebar a:hover {
-  background: rgba(255, 255, 255, 0.08);
-  color: #fff;
-}
-
-/* Current page — lighter pill so the active tab is obvious. */
-.sidebar a.active {
-  background: rgba(255, 255, 255, 0.16);
-  color: #fff;
-  font-weight: 600;
-}
-
-.main-content {
-  flex: 1;
-  padding: 30px;
-}
-
-.page-title {
-  font-size: 28px;
-  font-weight: 700;
-  margin-bottom: 20px;
-}
-
-.kpi-grid {
-  grid-template-columns: repeat(4, 1fr);
-}
-
-input {
-  display: block;
-  width: 100%;
-  padding: 12px;
-  margin-top: 12px;
-  border: 1px solid #ddd;
-  border-radius: 10px;
-}
-
-.balance {
-  font-size: 32px;
-  font-weight: 700;
-  margin: 16px 0;
+.sidebar-scroll::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 999px;
 }

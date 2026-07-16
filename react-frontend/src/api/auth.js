@@ -1,21 +1,23 @@
 import { apiRequest } from "./client";
 
-// auth-user-service endpoints.
+// auth-user-service @ :8081, via Vite proxy.
 
-/**
- * POST /auth/login
- * @param {{username: string, password: string}} credentials
- * @returns {Promise<{token: string, username: string, role: string}>}
- */
-export function login(credentials) {
-  return apiRequest("/auth/login", { method: "POST", body: credentials });
+// POST /auth/login
+//   request : { username, password }
+//   response: { token, username, role }
+export function login({ username, password }) {
+  return apiRequest("/auth/login", {
+    method: "POST",
+    body: { username, password },
+  });
 }
 
-/**
- * POST /users/register
- * @param {{username: string, email: string, password: string}} payload
- * @returns created user
- */
-export function register(payload) {
-  return apiRequest("/users/register", { method: "POST", body: payload });
+// POST /users/register
+//   request : { username, email, password }
+//   response: created User { id, username, email, role, createdAt }
+export function register({ username, email, password }) {
+  return apiRequest("/users/register", {
+    method: "POST",
+    body: { username, email, password },
+  });
 }

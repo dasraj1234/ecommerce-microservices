@@ -1,4 +1,5 @@
-import Sidebar from "../../components/Sidebar";
+import PageShell from "../../components/PageShell";
+import Card from "../../components/Card";
 
 // Wallet balance view — BLOCKED on the backend.
 // payment-wallet-service currently has only a WalletService.debit() stub and
@@ -7,21 +8,16 @@ import Sidebar from "../../components/Sidebar";
 // button that calls nothing.
 export default function CustomerWallet() {
   return (
-    <div className="layout">
-      <Sidebar type="customer" />
-      <div className="main-content">
-        <h1>Wallet</h1>
-
-        <div className="card">
-          <h3>Current Balance</h3>
-          <div className="balance">₹—</div>
-          <p style={{ color: "#b45309" }}>
-            Wallet balance isn&apos;t available yet — the payment service has no
-            balance endpoint (pending backend R5). Wallet <em>payments</em> work
-            via the Pay with Wallet option at checkout.
-          </p>
+    <PageShell type="customer" eyebrow="Storefront" title="Wallet">
+      <Card title="Current balance" className="max-w-md">
+        <p className="font-mono text-4xl font-semibold text-ink-900">₹—</p>
+        <div className="mt-4 rounded-lg border border-brand/20 bg-brand/5 px-4 py-3 text-sm text-brand-dark">
+          Balance isn&apos;t available yet — the payment service has no
+          balance endpoint (pending backend work). Wallet{" "}
+          <span className="font-medium">payments</span> still work via the
+          "Pay with wallet" option at checkout.
         </div>
-      </div>
-    </div>
+      </Card>
+    </PageShell>
   );
 }

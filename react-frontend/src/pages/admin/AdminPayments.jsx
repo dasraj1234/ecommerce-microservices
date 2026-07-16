@@ -1,161 +1,87 @@
-import { useEffect, useState } from "react";
-import Sidebar from "../../components/Sidebar";
-import { getPayment, getAllPayments } from "../../api/payments";
+import { useState } from "react";
+import PageShell from "../../components/PageShell";
+import Card from "../../components/Card";
+import Field from "../../components/Field";
+import Button from "../../components/Button";
+import IdTag from "../../components/IdTag";
+import StatusBadge from "../../components/StatusBadge";
+import { getPayment } from "../../api/payments";
 
-// Admin payments: auto-loaded table of all payments + lookup by id.
-// Backend: GET /payments/all, GET /payments/{paymentId}  (payment-wallet @ :8083)
+// Admin: look up a single payment by id.
+// Backend: GET /payments/{paymentId}  (payment-wallet-service @ :8083)
 export default function AdminPayments() {
-  const [payments, setPayments] = useState(null); // null = loading
-  const [loadError, setLoadError] = useState("");
-
   const [paymentId, setPaymentId] = useState("");
-  const [match, setMatch] = useState(null);
-  const [searchError, setSearchError] = useState("");
-  const [searching, setSearching] = useState(false);
-
-  const loadAll = async () => {
-    setLoadError("");
-    try {
-      const data = await getAllPayments();
-      setPayments(data || []);
-    } catch (err) {
-      setLoadError(err.message || "Could not load payments.");
-      setPayments([]);
-    }
-  };
-
-  useEffect(() => {
-    loadAll();
-  }, []);
+  const [payment, setPayment] = useState(null);
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const search = async () => {
     if (!paymentId.trim()) {
-      setSearchError("Enter a payment id.");
-      setMatch(null);
+      setError("Enter a payment id.");
       return;
     }
-    setSearching(true);
-    setSearchError("");
-    setMatch(null);
+    setError("");
+    setLoading(true);
+    setPayment(null);
     try {
       const data = await getPayment(paymentId.trim());
-      setMatch(data);
+      setPayment(data);
     } catch (err) {
-      setSearchError(err.message || "Payment not found.");
+      setError(err.message || "Payment not found.");
     } finally {
-      setSearching(false);
+      setLoading(false);
     }
   };
 
-  const statusColor = (s) =>
-    s === "SUCCESS" ? "#16a34a" : s === "FAILED" ? "#dc2626" : "#b45309";
-
-  const row = (p, key) => (
-    <tr key={key} style={{ borderBottom: "1px solid #f3f4f6" }}>
-      <td style={{ padding: 8 }}>{p.paymentId}</td>
-      <td style={{ padding: 8 }}>{p.orderId}</td>
-      <td style={{ padding: 8 }}>{p.userId}</td>
-      <td style={{ padding: 8 }}>₹{p.amount}</td>
-      <td style={{ padding: 8, color: statusColor(p.status), fontWeight: 600 }}>
-        {p.status}
-      </td>
-      <td style={{ padding: 8 }}>{p.createdDate || "—"}</td>
-    </tr>
-  );
-
   return (
-    <div className="layout">
-      <Sidebar type="admin" />
-      <div className="main-content">
-        <div className="page-title">Payments Management</div>
-
-        <div className="card">
-          <h3>Search Payment</h3>
-          <input
-            placeholder="Payment ID"
-            value={paymentId}
-            onChange={(e) => {
-              setPaymentId(e.target.value);
-              setSearchError("");
-            }}
-            onKeyDown={(e) => e.key === "Enter" && search()}
-          />
-          <button onClick={search} disabled={searching}>
-            {searching ? "Searching..." : "Search Payment"}
-          </button>
-          {searchError && (
-            <p style={{ color: "#dc2626", marginTop: 12 }}>{searchError}</p>
-          )}
-
-          {match && (
-            <table
-              style={{ width: "100%", borderCollapse: "collapse", marginTop: 16 }}
-            >
-              <thead>
-                <tr style={{ textAlign: "left", borderBottom: "1px solid #eee" }}>
-                  <th style={{ padding: 8 }}>Payment ID</th>
-                  <th style={{ padding: 8 }}>Order ID</th>
-                  <th style={{ padding: 8 }}>User ID</th>
-                  <th style={{ padding: 8 }}>Amount</th>
-                  <th style={{ padding: 8 }}>Status</th>
-                  <th style={{ padding: 8 }}>Created</th>
-                </tr>
-              </thead>
-              <tbody>{row(match, "match")}</tbody>
-            </table>
-          )}
-        </div>
-
-        <div className="card" style={{ marginTop: 20 }}>
-          <h3>
-            All Payments
-            {payments && (
-              <span style={{ fontWeight: 400, color: "#6b7280", fontSize: 14 }}>
-                {" "}
-                ({payments.length})
-              </span>
+    <PageShell type="admin" eyebrow="Ops Console" title="Payments Management">
+      <div className="grid gap-6 lg:grid-cols-[360px_1fr]">
+        <Card title="Search payment">
+          <div className="space-y-4">
+            <Field
+              label="Payment ID"
+              placeholder="PAY-1001"
+              value={paymentId}
+              onChange={(e) => setPaymentId(e.target.value)}
+            />
+            <Button variant="brand" onClick={search} disabled={loading} className="w-full">
+              {loading ? "Searching…" : "Search payment"}
+            </Button>
+            {error && (
+              <p className="rounded-lg border border-red-500/20 bg-red-500/5 px-3.5 py-2.5 text-sm text-red-600">
+                {error}
+              </p>
             )}
-          </h3>
+          </div>
+        </Card>
 
-          <button onClick={loadAll}>Refresh</button>
-
-          {loadError && (
-            <p style={{ color: "#dc2626", marginTop: 12 }}>{loadError}</p>
-          )}
-
-          <table
-            style={{ width: "100%", borderCollapse: "collapse", marginTop: 16 }}
-          >
-            <thead>
-              <tr style={{ textAlign: "left", borderBottom: "1px solid #eee" }}>
-                <th style={{ padding: 8 }}>Payment ID</th>
-                <th style={{ padding: 8 }}>Order ID</th>
-                <th style={{ padding: 8 }}>User ID</th>
-                <th style={{ padding: 8 }}>Amount</th>
-                <th style={{ padding: 8 }}>Status</th>
-                <th style={{ padding: 8 }}>Created</th>
-              </tr>
-            </thead>
-            <tbody>
-              {payments === null ? (
-                <tr>
-                  <td style={{ padding: 8 }} colSpan={6}>
-                    Loading payments...
-                  </td>
-                </tr>
-              ) : payments.length === 0 ? (
-                <tr>
-                  <td style={{ padding: 8 }} colSpan={6}>
-                    No payments found.
-                  </td>
-                </tr>
-              ) : (
-                payments.map((p) => row(p, p.paymentId))
-              )}
-            </tbody>
-          </table>
-        </div>
+        {payment ? (
+          <Card title={`Payment ${payment.paymentId}`}>
+            <dl className="grid grid-cols-2 gap-x-6 gap-y-4 text-sm">
+              <div>
+                <dt className="text-xs uppercase tracking-wide text-ink-600/60">Order</dt>
+                <dd className="mt-1"><IdTag>{payment.orderId}</IdTag></dd>
+              </div>
+              <div>
+                <dt className="text-xs uppercase tracking-wide text-ink-600/60">User</dt>
+                <dd className="mt-1"><IdTag>{payment.userId}</IdTag></dd>
+              </div>
+              <div>
+                <dt className="text-xs uppercase tracking-wide text-ink-600/60">Amount</dt>
+                <dd className="mt-1 font-mono text-base font-medium text-ink-900">₹{payment.amount}</dd>
+              </div>
+              <div>
+                <dt className="text-xs uppercase tracking-wide text-ink-600/60">Status</dt>
+                <dd className="mt-1"><StatusBadge status={payment.status} /></dd>
+              </div>
+            </dl>
+          </Card>
+        ) : (
+          <Card className="flex items-center justify-center border-dashed text-sm text-ink-600/60">
+            Search a payment ID to see its details here.
+          </Card>
+        )}
       </div>
-    </div>
+    </PageShell>
   );
 }
