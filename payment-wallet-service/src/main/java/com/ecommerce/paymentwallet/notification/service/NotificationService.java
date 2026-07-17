@@ -41,7 +41,7 @@ public class NotificationService {
         message.setTo(email);
 
         message.setSubject(
-                "IMPORTANT! Your bank account is in danger!"
+                "Payment Successful — EcomVerse"
         );
 
         message.setText(

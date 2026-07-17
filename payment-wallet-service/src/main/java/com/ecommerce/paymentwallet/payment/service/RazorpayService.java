@@ -236,6 +236,11 @@ try {
                         request.getUserId()
                 );
 
+        if (customer == null || customer.getEmail() == null) {
+            System.out.println("EMAIL SKIPPED — no contact found for userId=" + request.getUserId());
+            return;
+        }
+
         notificationService.sendPaymentSuccessMail(
                 customer.getEmail(),
                 customer.getCustomerName(),
@@ -243,7 +248,7 @@ try {
                 request.getAmount()
         );
 
-        System.out.println("EMAIL SENT");
+        System.out.println("EMAIL SENT to " + customer.getEmail());
 
     } catch (Exception ex) {
 
