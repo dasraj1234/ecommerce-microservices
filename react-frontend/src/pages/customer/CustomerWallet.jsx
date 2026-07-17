@@ -462,7 +462,20 @@ function SpendingChart({ txns }) {
     const byMonth = {};
     txns.forEach((t) => {
       if (!t.transactionDate) return;
-      const date = new Date(t.transactionDate);
+      // Backend returns "dd MMM yyyy hh:mm a" (e.g. "18 Jul 2026 02:30 PM").
+      // new Date() cannot parse this format reliably, so convert it to ISO first.
+      const raw = t.transactionDate;
+      const months = { Jan:0,Feb:1,Mar:2,Apr:3,May:4,Jun:5,Jul:6,Aug:7,Sep:8,Oct:9,Nov:10,Dec:11 };
+      const m = raw.match(/^(\d{1,2}) (\w{3}) (\d{4}) (\d{1,2}):(\d{2}) (AM|PM)$/i);
+      let date;
+      if (m) {
+        let hr = parseInt(m[4], 10);
+        if (m[6].toUpperCase() === "PM" && hr !== 12) hr += 12;
+        if (m[6].toUpperCase() === "AM" && hr === 12) hr = 0;
+        date = new Date(parseInt(m[3],10), months[m[2]], parseInt(m[1],10), hr, parseInt(m[5],10));
+      } else {
+        date = new Date(raw);
+      }
       if (isNaN(date)) return;
       const key   = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
       const label = date.toLocaleString("default", { month: "short", year: "2-digit" });

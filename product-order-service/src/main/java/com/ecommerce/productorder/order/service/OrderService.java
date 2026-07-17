@@ -67,7 +67,7 @@ public class OrderService {
                                 
     }
 
-    //@Transactional
+    @Transactional
     public OrderResponse createOrder(OrderRequest request) {
 
       LOGGER.info(
@@ -145,16 +145,16 @@ if (request.getOrderId() != null &&
                     request.getQuantity()
             );
 
-    orderRepository.updateOrderStatus(
-        orderId,
-        OrderStatus.CONFIRMED.name()
-);
-
  if (!stockUpdated) {
         throw new InsufficientStockException(
                 request.getProductId()
         );
     }
+
+    orderRepository.updateOrderStatus(
+        orderId,
+        OrderStatus.CONFIRMED.name()
+);
 
 LOGGER.info(
     "PAYMENT ID RECEIVED = {}",

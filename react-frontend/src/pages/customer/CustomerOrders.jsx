@@ -132,7 +132,8 @@ function PlaceOrder({ product }) {
   };
 
   // Common tail of both payment paths.
-  const confirmOrder = async (paymentId) => {
+  // orderId is passed so the order row uses the same ID that was stored in the payment row.
+  const confirmOrder = async (paymentId, orderId) => {
     const order = await createOrder({
       userId,
       productId: product.productId,
@@ -140,6 +141,7 @@ function PlaceOrder({ product }) {
       totalAmount,
       paymentMethod: method,
       paymentId,
+      orderId,
     });
     setSuccess({
       orderId: order.orderId,
@@ -150,23 +152,24 @@ function PlaceOrder({ product }) {
   };
 
   const payWithRazorpay = async () => {
+    const provisionalOrderId = "ORD-" + Date.now();
     const rzp = await createRazorpayOrder({
       userId,
-      orderId: "ORD-" + Date.now(), // provisional; the real id is minted by /orders/create
+      orderId: provisionalOrderId,
       amount: totalAmount,
     });
     const callback = await openRazorpayCheckout(rzp, { name: getUsername() });
     const verified = await verifyRazorpayPayment({
       ...callback,
       userId,
-      orderId: rzp.razorpayOrderId,
+      orderId: provisionalOrderId, // our business orderId, not Razorpay's order_xxx
       amount: totalAmount,
       idempotencyKey: "IDEMP-" + crypto.randomUUID(),
     });
     if (verified.status !== "SUCCESS") {
       throw new Error(verified.message || "Payment verification failed.");
     }
-    await confirmOrder(verified.paymentId);
+    await confirmOrder(verified.paymentId, provisionalOrderId);
   };
 
   const payWithWallet = async (pin) => {

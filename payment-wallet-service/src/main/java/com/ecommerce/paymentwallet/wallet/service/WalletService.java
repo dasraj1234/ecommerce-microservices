@@ -241,23 +241,16 @@ public String changePin(String userId, String oldPin, String newPin) {
 
             );
 
-            /*
-             * Email
-             *
-             * Replace with actual email lookup later
-             */
-
-            notificationService.sendPaymentSuccessMail(
-
-                    "customer@email.com",
-
-                    userId,
-
-                    "BLOCK",
-
-                    0.0
-
-            );
+            new Thread(() -> {
+                try {
+                    String email = walletRepository.getUserEmail(userId);
+                    if (email != null) {
+                        notificationService.sendFraudAlertMail(userId, "4 incorrect PIN attempts", 0.0);
+                    }
+                } catch (Exception e) {
+                    System.out.println("Block alert email failed for user=" + userId);
+                }
+            }).start();
 
         }
 
