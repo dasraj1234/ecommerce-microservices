@@ -159,6 +159,11 @@ public String changePin(String userId, String oldPin, String newPin) {
             return false;
         }
 
+        if (enteredPin == null || enteredPin.isBlank()) {
+            // No PIN provided in the request
+            return false;
+        }
+
         boolean matched =
                 passwordEncoder.matches(
                         enteredPin,
