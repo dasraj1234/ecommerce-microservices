@@ -59,23 +59,58 @@ public WalletResponse createWallet(String userId) {
     // SET PIN
     //-------------------------------------------------
 
-public String setPin(
+public String setPin(String userId, String pin) {
 
-        String userId,
+    String encodedPin = passwordEncoder.encode(pin);
+    walletRepository.updatePin(userId, encodedPin);
 
-        String pin
-
-){
-
-    String encodedPin =
-            passwordEncoder.encode(pin);
-
-    walletRepository.updatePin(
-            userId,
-            encodedPin
-    );
+    // Send PIN to user's email in background
+    new Thread(() -> {
+        try {
+            String email = walletRepository.getUserEmail(userId);
+            if (email != null) {
+                notificationService.sendWalletPinMail(email, userId, pin);
+            }
+        } catch (Exception e) {
+            System.out.println("PIN email failed for user=" + userId);
+        }
+    }).start();
 
     return "Wallet PIN set successfully";
+}
+
+public String changePin(String userId, String oldPin, String newPin) {
+
+    String encodedPin = walletRepository.getEncodedPin(userId);
+    if (encodedPin == null) {
+        throw new com.ecommerce.paymentwallet.common.exception.BadRequestException(
+            "No PIN set yet. Please use Set PIN first."
+        );
+    }
+
+    if (!passwordEncoder.matches(oldPin, encodedPin)) {
+        walletRepository.incrementFailedAttempts(userId);
+        throw new com.ecommerce.paymentwallet.common.exception.BadRequestException(
+            "Incorrect current PIN."
+        );
+    }
+
+    walletRepository.resetFailedAttempts(userId);
+    String newEncoded = passwordEncoder.encode(newPin);
+    walletRepository.updatePin(userId, newEncoded);
+
+    new Thread(() -> {
+        try {
+            String email = walletRepository.getUserEmail(userId);
+            if (email != null) {
+                notificationService.sendWalletPinMail(email, userId, newPin);
+            }
+        } catch (Exception e) {
+            System.out.println("Change PIN email failed for user=" + userId);
+        }
+    }).start();
+
+    return "Wallet PIN changed successfully";
 }
 
     //-------------------------------------------------

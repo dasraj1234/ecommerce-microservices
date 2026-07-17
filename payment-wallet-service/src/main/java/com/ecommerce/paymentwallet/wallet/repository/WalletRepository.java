@@ -137,6 +137,10 @@ public class WalletRepository {
                             )
                     );
 
+                    wallet.setHasPinSet(
+                            rs.getString("wallet_pin") != null
+                    );
+
                     return wallet;
 
                 },
@@ -266,6 +270,18 @@ public class WalletRepository {
 
         );
 
+    }
+
+    public String getUserEmail(String userId) {
+        try {
+            return jdbcTemplate.queryForObject(
+                    "SELECT email FROM users WHERE user_id=?",
+                    String.class,
+                    userId
+            );
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     public void updatePin(

@@ -1,6 +1,8 @@
 package com.ecommerce.paymentwallet.wallet.controller;
 
 import com.ecommerce.paymentwallet.wallet.dto.*;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 import com.ecommerce.paymentwallet.wallet.service.WalletService;
 import org.springframework.http.ResponseEntity;
 
@@ -102,6 +104,25 @@ public class WalletController {
         );
 
         return ResponseEntity.ok(response);
+    }
+
+    /*
+     * Change PIN — customer only, verifies old PIN before setting new one.
+     * Admin must never call this endpoint.
+     */
+    @PostMapping("/change-pin")
+    public ResponseEntity<String> changePin(
+            @RequestBody WalletChangePinRequest request) {
+        try {
+            String result = walletService.changePin(
+                    request.getUserId(),
+                    request.getOldPin(),
+                    request.getNewPin()
+            );
+            return ResponseEntity.ok(result);
+        } catch (com.ecommerce.paymentwallet.common.exception.BadRequestException ex) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, ex.getMessage());
+        }
     }
 
     /*

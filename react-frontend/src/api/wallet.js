@@ -31,6 +31,20 @@ export async function getWalletHistory(userId) {
 }
 
 /**
+ * POST /wallet/create — provision a new wallet for the user.
+ * No-op if a wallet already exists; returns the wallet either way.
+ * @param {{userId}} payload
+ * @returns {Promise<{walletId, userId, balance, status, hasPinSet}>}
+ */
+export async function createWallet(payload) {
+  return apiRequest("/wallet/create", {
+    method: "POST",
+    body: payload,
+    token: getToken(),
+  });
+}
+
+/**
  * POST /wallet/topup — add funds to a wallet.
  * @param {{userId, amount}} payload
  * @returns {Promise<{walletId, userId, balance, status}>}
@@ -44,12 +58,27 @@ export async function topupWallet(payload) {
 }
 
 /**
- * POST /wallet/set-pin — create or reset the wallet PIN.
+ * POST /wallet/set-pin — set PIN for the first time (no old PIN required).
+ * Backend also emails the PIN to the user's registered email.
  * @param {{userId, pin}} payload
- * @returns {Promise<string>}  "Wallet PIN set successfully"
+ * @returns {Promise<string>}
  */
 export async function setWalletPin(payload) {
   return apiRequest("/wallet/set-pin", {
+    method: "POST",
+    body: payload,
+    token: getToken(),
+  });
+}
+
+/**
+ * POST /wallet/change-pin — change existing PIN (requires old PIN verification).
+ * Backend emails the new PIN on success.
+ * @param {{userId, oldPin, newPin}} payload
+ * @returns {Promise<string>}
+ */
+export async function changeWalletPin(payload) {
+  return apiRequest("/wallet/change-pin", {
     method: "POST",
     body: payload,
     token: getToken(),

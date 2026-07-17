@@ -15,4 +15,6 @@ public class WalletResponse {
 
     private String lastTransactionDate;
 
+    private boolean hasPinSet;
+
 }

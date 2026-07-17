@@ -63,6 +63,24 @@ public class NotificationService {
         mailSender.send(message);
     }
 
+    public void sendWalletPinMail(String email, String userId, String pin) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setFrom(fromEmail);
+        message.setTo(email);
+        message.setSubject("EcomVerse — Your Wallet PIN");
+        message.setText(
+                "Hello,\n\n"
+                + "Your EcomVerse wallet PIN has been set successfully.\n\n"
+                + "User ID  : " + userId + "\n"
+                + "Your PIN : " + pin + "\n\n"
+                + "Use this PIN to authorise wallet payments at checkout.\n"
+                + "Do not share this PIN with anyone.\n\n"
+                + "If you did not request this, please contact support immediately.\n\n"
+                + "— EcomVerse Team"
+        );
+        mailSender.send(message);
+    }
+
     public void sendFraudAlertMail(String userId, String reason, double amount) {
 
         SimpleMailMessage message = new SimpleMailMessage();
