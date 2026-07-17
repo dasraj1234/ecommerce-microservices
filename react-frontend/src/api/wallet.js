@@ -29,3 +29,29 @@ export async function getWalletHistory(userId) {
     token: getToken(),
   });
 }
+
+/**
+ * POST /wallet/topup — add funds to a wallet.
+ * @param {{userId, amount}} payload
+ * @returns {Promise<{walletId, userId, balance, status}>}
+ */
+export async function topupWallet(payload) {
+  return apiRequest("/wallet/topup", {
+    method: "POST",
+    body: payload,
+    token: getToken(),
+  });
+}
+
+/**
+ * POST /wallet/set-pin — create or reset the wallet PIN.
+ * @param {{userId, pin}} payload
+ * @returns {Promise<string>}  "Wallet PIN set successfully"
+ */
+export async function setWalletPin(payload) {
+  return apiRequest("/wallet/set-pin", {
+    method: "POST",
+    body: payload,
+    token: getToken(),
+  });
+}
