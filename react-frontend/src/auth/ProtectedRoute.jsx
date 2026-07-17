@@ -1,19 +1,24 @@
 import { Navigate, useLocation } from "react-router-dom";
-import { getRole } from "./session";
+import { isAuthenticated, getRole, homeForRole } from "./session";
 
-// Wraps a route element and only renders it if the logged-in user's role
-// matches. Otherwise redirects to /login, remembering where the user was
-// headed so Login can send them back after signing in.
+/**
+ * Guards a route.
+ * - Not logged in  -> redirect to /login (remembering where they wanted to go).
+ * - Wrong role     -> redirect to their own dashboard.
+ * - Otherwise      -> render the page.
+ *
+ * @param {string}  [role]    Required role for this route ("ADMIN" | "USER").
+ * @param {ReactNode} children The page to protect.
+ */
 export default function ProtectedRoute({ role, children }) {
   const location = useLocation();
-  const currentRole = getRole();
 
-  if (!currentRole) {
-    return <Navigate to="/login" state={{ from: location }} replace />;
+  if (!isAuthenticated()) {
+    return <Navigate to="/login" replace state={{ from: location }} />;
   }
 
-  if (currentRole !== role) {
-    return <Navigate to="/login" state={{ from: location }} replace />;
+  if (role && getRole() !== role) {
+    return <Navigate to={homeForRole(getRole())} replace />;
   }
 
   return children;

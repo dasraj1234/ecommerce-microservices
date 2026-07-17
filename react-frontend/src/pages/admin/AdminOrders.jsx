@@ -1,22 +1,28 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import PageShell from "../../components/PageShell";
 import Card from "../../components/Card";
 import Field from "../../components/Field";
 import Button from "../../components/Button";
 import IdTag from "../../components/IdTag";
 import StatusBadge from "../../components/StatusBadge";
-import { createOrder, cancelOrder, getOrderHistory } from "../../api/orders";
+import {
+  createOrder,
+  cancelOrder,
+  getOrderHistory,
+  getAllOrders,
+} from "../../api/orders";
 
 // Admin order management.
 // Backend: POST /orders/create, PATCH /orders/{id}/cancel,
-//          GET /orders/history/{userId}  (product-order @ :8082)
+//          GET /orders/all (admin), GET /orders/history/{userId}
+//          (product-order @ :8082, via the gateway)
 const EMPTY_ORDER = { userId: "", productId: "", quantity: "", totalAmount: "" };
 
 export default function AdminOrders() {
   const [form, setForm] = useState(EMPTY_ORDER);
   const [cancelId, setCancelId] = useState("");
-  const [historyUserId, setHistoryUserId] = useState("");
-  const [orders, setOrders] = useState([]);
+  const [filterUserId, setFilterUserId] = useState("");
+  const [orders, setOrders] = useState(null); // null = loading
   const [log, setLog] = useState([{ level: "info", text: "Orders console ready." }]);
   const [busy, setBusy] = useState("");
 
@@ -24,6 +30,29 @@ export default function AdminOrders() {
 
   const onChange = (e) =>
     setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
+
+  // Blank filter = every order across all users; otherwise that user's history.
+  const loadOrders = async () => {
+    setBusy("orders");
+    try {
+      const data = filterUserId.trim()
+        ? await getOrderHistory(filterUserId.trim())
+        : await getAllOrders();
+      setOrders(data || []);
+      pushLog("success", `Loaded ${data ? data.length : 0} order(s).`);
+    } catch (err) {
+      pushLog("error", err.message || "Could not load orders.");
+      setOrders([]);
+    } finally {
+      setBusy("");
+    }
+  };
+
+  // Auto-load all orders when the page opens.
+  useEffect(() => {
+    loadOrders();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const create = async () => {
     if (!form.userId.trim() || !form.productId.trim()) {
@@ -40,6 +69,7 @@ export default function AdminOrders() {
       });
       pushLog("success", `Order placed — ${result.orderId} (${result.status})`);
       setForm(EMPTY_ORDER);
+      loadOrders();
     } catch (err) {
       pushLog("error", err.message || "Could not create order.");
     } finally {
@@ -57,27 +87,9 @@ export default function AdminOrders() {
       const result = await cancelOrder(cancelId.trim());
       pushLog("success", `Order ${result.orderId} — ${result.status}`);
       setCancelId("");
-      if (historyUserId.trim()) loadHistory();
+      loadOrders();
     } catch (err) {
       pushLog("error", err.message || "Could not cancel order.");
-    } finally {
-      setBusy("");
-    }
-  };
-
-  const loadHistory = async () => {
-    if (!historyUserId.trim()) {
-      pushLog("error", "Enter a user id to load history.");
-      return;
-    }
-    setBusy("history");
-    try {
-      const data = await getOrderHistory(historyUserId.trim());
-      setOrders(data || []);
-      pushLog("success", `History loaded (${data ? data.length : 0} orders).`);
-    } catch (err) {
-      pushLog("error", err.message || "Could not load history.");
-      setOrders([]);
     } finally {
       setBusy("");
     }
@@ -110,18 +122,41 @@ export default function AdminOrders() {
         </Card>
       </div>
 
-      <Card title="Order history" subtitle="Look up all orders for a given user" className="mt-6">
+      <Card
+        title="All orders"
+        subtitle={
+          orders
+            ? `${orders.length} order${orders.length === 1 ? "" : "s"}${
+                filterUserId.trim() ? ` for ${filterUserId.trim()}` : " across all users"
+              }`
+            : "Loading…"
+        }
+        className="mt-6"
+      >
         <div className="mb-5 flex flex-wrap items-end gap-3">
           <Field
-            label="User ID"
+            label="Filter by user ID (blank = all)"
             placeholder="USER-1001"
-            value={historyUserId}
-            onChange={(e) => setHistoryUserId(e.target.value)}
+            value={filterUserId}
+            onChange={(e) => setFilterUserId(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && loadOrders()}
             className="max-w-xs flex-1"
           />
-          <Button variant="outline" onClick={loadHistory} disabled={busy === "history"}>
-            {busy === "history" ? "Loading…" : "Load history"}
+          <Button variant="outline" onClick={loadOrders} disabled={busy === "orders"}>
+            {busy === "orders" ? "Loading…" : filterUserId.trim() ? "Filter" : "Refresh"}
           </Button>
+          {filterUserId.trim() && (
+            <Button
+              variant="outline"
+              onClick={() => {
+                setFilterUserId("");
+                setTimeout(loadOrders, 0);
+              }}
+              disabled={busy === "orders"}
+            >
+              Clear
+            </Button>
+          )}
         </div>
 
         <div className="overflow-x-auto">
@@ -137,11 +172,13 @@ export default function AdminOrders() {
               </tr>
             </thead>
             <tbody>
-              {orders.length === 0 ? (
+              {orders === null ? (
                 <tr>
-                  <td className="py-6 text-ink-600/60" colSpan={6}>
-                    No orders loaded.
-                  </td>
+                  <td className="py-6 text-ink-600/60" colSpan={6}>Loading orders…</td>
+                </tr>
+              ) : orders.length === 0 ? (
+                <tr>
+                  <td className="py-6 text-ink-600/60" colSpan={6}>No orders found.</td>
                 </tr>
               ) : (
                 orders.map((o) => (

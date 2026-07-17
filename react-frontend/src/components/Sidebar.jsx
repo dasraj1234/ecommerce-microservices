@@ -72,10 +72,10 @@ export default function Sidebar({ type = "customer" }) {
     <aside className="sticky top-0 flex h-screen w-64 shrink-0 flex-col bg-ink-900 text-white/90">
       <div className="flex items-center gap-2 px-6 py-6">
         <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand font-display text-sm font-bold text-ink-900">
-          M
+          E
         </span>
         <div className="leading-tight">
-          <p className="font-display text-sm font-semibold text-white">Manifest</p>
+          <p className="font-display text-sm font-semibold text-white">EcomVerse</p>
           <p className="text-[11px] uppercase tracking-wider text-white/40">
             {type === "admin" ? "Ops Console" : "Storefront"}
           </p>

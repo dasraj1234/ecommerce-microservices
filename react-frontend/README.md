@@ -1,4 +1,4 @@
-# Manifest — E-Commerce Microservices Portal
+# EcomVerse — E-Commerce Microservices Portal
 
 Redesigned frontend for the products/orders/payments/wallet microservices
 platform. Functionality and API contracts are unchanged from the original —

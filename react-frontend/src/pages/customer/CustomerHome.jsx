@@ -1,24 +1,20 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import PageShell from "../../components/PageShell";
 import Card from "../../components/Card";
-import Field from "../../components/Field";
 import Button from "../../components/Button";
 import IdTag from "../../components/IdTag";
 import { searchProducts } from "../../api/products";
-import { createOrder } from "../../api/orders";
-import { getUserId, setUserId } from "../../auth/session";
 
-// Customer product browsing + ordering.
-// Backend: GET /products/search, POST /orders/create (product-order-service @ :8082, via Vite proxy)
+// Customer product browsing. "Order now" hands the product off to the checkout
+// form (CustomerOrders), which owns quantity, payment method and payment —
+// same handoff as the JSP frontend's home -> orders?productId=…&amount=…
+// Backend: GET /products/search (product-order-service @ :8082, via the gateway)
 export default function CustomerHome() {
+  const navigate = useNavigate();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-
-  const [userId, setUserIdInput] = useState(getUserId() || "");
-  const [quantities, setQuantities] = useState({});
-  const [ordering, setOrdering] = useState(null);
-  const [orderStatus, setOrderStatus] = useState({});
 
   useEffect(() => {
     let cancelled = false;
@@ -37,69 +33,15 @@ export default function CustomerHome() {
     };
   }, []);
 
-  const quantityFor = (productId) => quantities[productId] ?? 1;
-  const setQuantityFor = (productId, value) =>
-    setQuantities((q) => ({ ...q, [productId]: value }));
-
-  const placeOrder = async (product) => {
-    setOrderStatus((s) => ({ ...s, [product.productId]: null }));
-
-    if (!userId.trim()) {
-      setOrderStatus((s) => ({
-        ...s,
-        [product.productId]: { ok: false, message: "Enter your user id above first." },
-      }));
-      return;
-    }
-    const quantity = parseInt(quantityFor(product.productId), 10);
-    if (!Number.isInteger(quantity) || quantity <= 0) {
-      setOrderStatus((s) => ({
-        ...s,
-        [product.productId]: { ok: false, message: "Quantity must be a positive number." },
-      }));
-      return;
-    }
-
-    setOrdering(product.productId);
-    try {
-      setUserId(userId.trim());
-      const data = await createOrder({
-        userId: userId.trim(),
-        productId: product.productId,
-        quantity,
-        totalAmount: product.price * quantity,
-      });
-      setOrderStatus((s) => ({
-        ...s,
-        [product.productId]: { ok: true, message: `Order ${data.orderId} ${data.status}` },
-      }));
-    } catch (err) {
-      setOrderStatus((s) => ({
-        ...s,
-        [product.productId]: { ok: false, message: err.message || "Could not place order." },
-      }));
-    } finally {
-      setOrdering(null);
-    }
-  };
+  const orderNow = (p) =>
+    navigate(
+      `/customer/orders?productId=${encodeURIComponent(p.productId)}` +
+        `&name=${encodeURIComponent(p.productName)}` +
+        `&price=${p.price}`
+    );
 
   return (
     <PageShell type="customer" eyebrow="Storefront" title="Browse products">
-      <Card className="mb-6 !p-4">
-        <div className="flex flex-wrap items-end gap-3">
-          <Field
-            label="Your user ID"
-            placeholder="USER-1001"
-            value={userId}
-            onChange={(e) => setUserIdInput(e.target.value)}
-            className="max-w-xs flex-1"
-          />
-          <p className="pb-2.5 text-xs text-ink-600/60">
-            Used to place orders and look up your history.
-          </p>
-        </div>
-      </Card>
-
       {loading ? (
         <Card className="text-sm text-ink-600">Loading products…</Card>
       ) : error ? (
@@ -109,7 +51,6 @@ export default function CustomerHome() {
       ) : (
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {products.map((p) => {
-            const status = orderStatus[p.productId];
             const lowStock = typeof p.stock === "number" && p.stock <= 5;
             return (
               <div
@@ -133,28 +74,14 @@ export default function CustomerHome() {
                   <p className="mt-0.5 text-xs text-ink-600/60">{p.stock} in stock</p>
                 </div>
 
-                <div className="mt-4 space-y-2.5">
-                  <input
-                    type="number"
-                    min="1"
-                    value={quantityFor(p.productId)}
-                    onChange={(e) => setQuantityFor(p.productId, e.target.value)}
-                    className="w-full rounded-lg border border-ink-900/10 bg-paper px-3 py-2 text-sm outline-none focus:border-brand focus:ring-2 focus:ring-brand/20"
-                  />
-                  <Button
-                    variant="brand"
-                    onClick={() => placeOrder(p)}
-                    disabled={ordering === p.productId}
-                    className="w-full"
-                  >
-                    {ordering === p.productId ? "Ordering…" : "Order now"}
-                  </Button>
-                  {status && (
-                    <p className={`text-xs ${status.ok ? "text-teal-dark" : "text-red-600"}`}>
-                      {status.message}
-                    </p>
-                  )}
-                </div>
+                <Button
+                  variant="brand"
+                  onClick={() => orderNow(p)}
+                  disabled={p.stock === 0}
+                  className="mt-4 w-full"
+                >
+                  {p.stock === 0 ? "Out of stock" : "Order now"}
+                </Button>
               </div>
             );
           })}

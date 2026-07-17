@@ -64,9 +64,9 @@ export default function Login() {
       <div className="hidden w-1/2 flex-col justify-between bg-ink-950 p-12 text-white lg:flex">
         <div className="flex items-center gap-2">
           <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand font-display text-sm font-bold text-ink-900">
-            M
+            E
           </span>
-          <span className="font-display text-sm font-semibold">Manifest</span>
+          <span className="font-display text-sm font-semibold">EcomVerse</span>
         </div>
         <div>
           <p className="font-display text-3xl font-semibold leading-tight">
@@ -77,7 +77,7 @@ export default function Login() {
             sign-in.
           </p>
         </div>
-        <p className="text-xs text-white/25">© {new Date().getFullYear()} Manifest Platform</p>
+        <p className="text-xs text-white/25">© {new Date().getFullYear()} EcomVerse Platform</p>
       </div>
 
       {/* Form panel */}

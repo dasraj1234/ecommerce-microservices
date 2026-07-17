@@ -16,6 +16,7 @@ export default defineConfig({
       "/users": GATEWAY,
       "/products": GATEWAY,
       "/orders": GATEWAY,
+      "/categories": GATEWAY,
       "/payments": GATEWAY,
       "/wallet": GATEWAY,
     },

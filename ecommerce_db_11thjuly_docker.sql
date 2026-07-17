@@ -356,7 +356,11 @@ CREATE TABLE `payment_req_res` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `payment_id` varchar(50) DEFAULT NULL,
   `request_payload` longtext DEFAULT NULL,
+  -- AES-256-GCM encrypted payloads written by PaymentLogRepository alongside
+  -- the plaintext. Missing from the original dump, which broke Razorpay verify.
+  `request_payload_enc` longtext DEFAULT NULL,
   `response_payload` longtext DEFAULT NULL,
+  `response_payload_enc` longtext DEFAULT NULL,
   `status` varchar(30) DEFAULT NULL,
   `reason` varchar(500) DEFAULT NULL,
   `created_date` timestamp NOT NULL DEFAULT current_timestamp(),
@@ -374,6 +378,9 @@ CREATE TABLE `payments` (
   `order_id` varchar(50) NOT NULL,
   `user_id` varchar(50) NOT NULL,
   `amount` decimal(12,2) NOT NULL,
+  -- Required by PaymentRepository.saveRazorpayPayment (inserts 'RAZORPAY').
+  -- Missing from the original dump, which made every Razorpay verify fail.
+  `payment_method` varchar(20) DEFAULT NULL,
   `status` varchar(30) NOT NULL,
   `idempotency_key` varchar(100) DEFAULT NULL,
   `created_date` timestamp NOT NULL DEFAULT current_timestamp(),
@@ -452,7 +459,12 @@ CREATE TABLE `users` (
   `password` varchar(255) DEFAULT NULL,
   `role` varchar(255) DEFAULT NULL,
   `username` varchar(255) DEFAULT NULL,
-  PRIMARY KEY (`id`)
+  -- Business id (USER-1001) the order/payment/wallet services key on, and the
+  -- `userId` JWT claim the gateway uses for ownership checks. NULL for ADMIN.
+  -- Generated on signup; UserIdBackfillRunner fills any NULLs at startup.
+  `user_id` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `UK_users_user_id` (`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 /*Data for the table `users` */
@@ -460,16 +472,18 @@ CREATE TABLE `users` (
 -- Seed users merged from ecommerce_db.sql (BCrypt hashes).
 -- Plaintext logins (username / password):
 --   admin / MYADMIN, user1 / MYUSER1, user2 / MYUSER2, ... user8 / MYUSER8
-insert  into `users`(`id`,`username`,`password`,`email`,`role`,`created_at`) values
-('a0000000-0000-4000-8000-000000000001','admin','$2b$12$3guzRwAiSqAXK9hMCxjuxu6FhwS20CS0KwOMUgeZ0rwXgHyX9fYdW','admin@shop.com','ADMIN','2026-05-24'),
-('a0000000-0000-4000-8000-000000000002','user1','$2b$12$EM6VYlnqLtgHK5ZVpY/7jOYTJ2mCnYu20e5gfzG/rxqVq/WYIfpH.','user1@shop.com','USER','2026-05-24'),
-('a0000000-0000-4000-8000-000000000003','user2','$2b$12$WOOZZI.SH9LLoR7NjhwskeFD/xUpwS9Tkg5QI94YG.wbiIq38zlLS','user2@shop.com','USER','2026-05-24'),
-('a0000000-0000-4000-8000-000000000004','user3','$2b$12$49uw00DDtlrzo57zkdoL5e3cRcNGLwXT2LmQHD/Ltnbkmna7B7Mwu','user3@shop.com','USER','2026-05-24'),
-('a0000000-0000-4000-8000-000000000005','user4','$2b$12$Xp0oDAlY4ER8Ia7x1A2iqOMKuNlPDIuDNVBfqT8rzTnS5/yws.wRS','user4@shop.com','USER','2026-05-24'),
-('a0000000-0000-4000-8000-000000000006','user5','$2b$12$xHIQkvv3alMLGES51.5NfO7Ga4A9ArS1cf7w.SLVYkkJd5apbXcTS','user5@shop.com','USER','2026-05-24'),
-('a0000000-0000-4000-8000-000000000007','user6','$2b$12$1LUfSUkNxU6wIVmsabRsg.12vO4g/ZNXPUfMb.GKDmM5KlPiBRdMC','user6@shop.com','USER','2026-05-24'),
-('a0000000-0000-4000-8000-000000000008','user7','$2b$12$jo0ay07UbrPMv63P6CxYL.loz./hHPb0/RDth2/2/5bkKR2oy2K1i','user7@shop.com','USER','2026-05-24'),
-('a0000000-0000-4000-8000-000000000009','user8','$2b$12$ZGZdBsWOSA54Jd.a176DV.MErAG2zR6y0c/LKplxfzTRxyaahhIMO','user8@shop.com','USER','2026-05-24');
+-- user_id: admin has none (admins never order or hold a wallet); user1..user8
+-- map to USER-1001..USER-1008, matching the order/payment/wallet seed data.
+insert  into `users`(`id`,`username`,`password`,`email`,`role`,`created_at`,`user_id`) values
+('a0000000-0000-4000-8000-000000000001','admin','$2b$12$3guzRwAiSqAXK9hMCxjuxu6FhwS20CS0KwOMUgeZ0rwXgHyX9fYdW','admin@shop.com','ADMIN','2026-05-24',NULL),
+('a0000000-0000-4000-8000-000000000002','user1','$2b$12$EM6VYlnqLtgHK5ZVpY/7jOYTJ2mCnYu20e5gfzG/rxqVq/WYIfpH.','user1@shop.com','USER','2026-05-24','USER-1001'),
+('a0000000-0000-4000-8000-000000000003','user2','$2b$12$WOOZZI.SH9LLoR7NjhwskeFD/xUpwS9Tkg5QI94YG.wbiIq38zlLS','user2@shop.com','USER','2026-05-24','USER-1002'),
+('a0000000-0000-4000-8000-000000000004','user3','$2b$12$49uw00DDtlrzo57zkdoL5e3cRcNGLwXT2LmQHD/Ltnbkmna7B7Mwu','user3@shop.com','USER','2026-05-24','USER-1003'),
+('a0000000-0000-4000-8000-000000000005','user4','$2b$12$Xp0oDAlY4ER8Ia7x1A2iqOMKuNlPDIuDNVBfqT8rzTnS5/yws.wRS','user4@shop.com','USER','2026-05-24','USER-1004'),
+('a0000000-0000-4000-8000-000000000006','user5','$2b$12$xHIQkvv3alMLGES51.5NfO7Ga4A9ArS1cf7w.SLVYkkJd5apbXcTS','user5@shop.com','USER','2026-05-24','USER-1005'),
+('a0000000-0000-4000-8000-000000000007','user6','$2b$12$1LUfSUkNxU6wIVmsabRsg.12vO4g/ZNXPUfMb.GKDmM5KlPiBRdMC','user6@shop.com','USER','2026-05-24','USER-1006'),
+('a0000000-0000-4000-8000-000000000008','user7','$2b$12$jo0ay07UbrPMv63P6CxYL.loz./hHPb0/RDth2/2/5bkKR2oy2K1i','user7@shop.com','USER','2026-05-24','USER-1007'),
+('a0000000-0000-4000-8000-000000000009','user8','$2b$12$ZGZdBsWOSA54Jd.a176DV.MErAG2zR6y0c/LKplxfzTRxyaahhIMO','user8@shop.com','USER','2026-05-24','USER-1008');
 
 /*Table structure for table `wallets` */
 

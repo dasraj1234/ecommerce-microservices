@@ -13,10 +13,10 @@ export default function LandingPage() {
         {/* Masthead */}
         <div className="mb-14 flex items-center gap-3">
           <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand font-display text-lg font-bold text-ink-900">
-            M
+            E
           </span>
           <div>
-            <p className="font-display text-lg font-semibold tracking-tight">Manifest</p>
+            <p className="font-display text-lg font-semibold tracking-tight">EcomVerse</p>
             <p className="text-xs uppercase tracking-[0.2em] text-white/40">
               E-Commerce Microservices Platform
             </p>
