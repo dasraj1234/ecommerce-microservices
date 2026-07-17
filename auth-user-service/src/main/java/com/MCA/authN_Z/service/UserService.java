@@ -1,6 +1,7 @@
 package com.MCA.authN_Z.service;
 
 
+import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.UUID;
 
@@ -35,9 +36,17 @@ public class UserService {
 
 
         user.setPassword(encoder.encode(req.getPassword()));
+        user.setCreatedAt(LocalDate.now());
 
-        user.setRole("USER");
-        user.setUserId(generateNextUserId());
+        // Role from the request; anything other than ADMIN falls back to USER.
+        String role = "ADMIN".equalsIgnoreCase(req.getRole()) ? "ADMIN" : "USER";
+        user.setRole(role);
+        // Only customers get a business id (USER-1001, ...) that the order/
+        // payment/wallet services key on. Admins never order or hold a wallet,
+        // so they keep a null userId — matching the backfill runner's rule.
+        if ("USER".equals(role)) {
+            user.setUserId(generateNextUserId());
+        }
         return repo.save(user);
     }
 

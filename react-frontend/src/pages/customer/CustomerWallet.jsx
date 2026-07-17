@@ -79,7 +79,16 @@ export default function CustomerWallet() {
   if (step === STEP_SET_PIN) {
     return (
       <PageShell type="customer" eyebrow="Storefront" title="Wallet — Set Your PIN">
-        <SetPinStep userId={userId} wallet={wallet} onDone={() => { load(); }} />
+        <SetPinStep
+          userId={userId}
+          wallet={wallet}
+          onDone={() => {
+            // PIN confirmed set by the API — go straight to dashboard
+            // without re-fetching (avoids race with hasPinSet propagation).
+            setStep(STEP_READY);
+            load(); // refresh balance/txns in background
+          }}
+        />
       </PageShell>
     );
   }
