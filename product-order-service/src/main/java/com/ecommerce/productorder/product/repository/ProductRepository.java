@@ -190,4 +190,24 @@ public int deleteById(String productId) {
             productId
     );
 }
+
+public int updateById(
+        String productId,
+        String productName,
+        Double price,
+        Integer stock) {
+
+    String sql =
+            "UPDATE products " +
+            "SET product_name=?, price=?, stock=?, updated_date=NOW() " +
+            "WHERE product_id=?";
+
+    return jdbcTemplate.update(
+            sql,
+            productName,
+            price,
+            stock,
+            productId
+    );
+}
 }

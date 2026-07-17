@@ -71,6 +71,7 @@ public class PaymentService {
                 req.getOrderId(),
                 req.getUserId(),
                 req.getAmount(),
+                req.getPaymentMethod(),
                 PaymentStatus.PENDING.name(),
                 req.getIdempotencyKey()
         );
@@ -233,5 +234,15 @@ if ("WALLET".equalsIgnoreCase(req.getPaymentMethod())) {
         return paymentRepo.findByUserId(
                 userId
         );
+    }
+
+    public long countPayments() {
+
+        return paymentRepo.countAll();
+    }
+
+    public List<PaymentDetailsResponse> getAllPayments() {
+
+        return paymentRepo.findAll();
     }
 }

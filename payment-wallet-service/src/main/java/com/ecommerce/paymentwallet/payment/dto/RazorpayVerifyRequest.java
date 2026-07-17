@@ -18,4 +18,14 @@ public class RazorpayVerifyRequest {
     private String idempotencyKey; //fixed inconsistency 13th june
 
     private Double amount;  //fixed inconsistency 13th june
+
+    private String paymentMethod;
+
+    public String getPaymentMethod() {
+    return paymentMethod;
+}
+
+public void setPaymentMethod(String paymentMethod) {
+    this.paymentMethod = paymentMethod;
+}
 }

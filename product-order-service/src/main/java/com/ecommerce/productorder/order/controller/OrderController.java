@@ -12,6 +12,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 
 
@@ -87,6 +88,17 @@ public ApiResponse<OrderResponse> updateStatus(
         );
     }
 
+    @Operation(summary = "Get all orders (admin)")
+    @GetMapping("/all")
+
+    public ApiResponse<List<OrderHistoryResponse>> allOrders() {
+
+        return ApiResponse.success(
+                "All orders fetched successfully",
+                service.allOrders()
+        );
+    }
+
     //razorpay integration 12th june
     @GetMapping("/stock/check")
 public boolean checkStock(
@@ -98,4 +110,15 @@ public boolean checkStock(
             quantity
     );
 }
+
+@GetMapping("/generate-order-id")
+public Map<String, String> generateOrderId() {
+
+    return Map.of(
+        "orderId",
+        service.generateOrderId()
+    );
+
+}
+
 }

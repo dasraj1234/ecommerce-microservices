@@ -20,6 +20,23 @@ export async function getUserPayments(userId) {
 }
 
 /**
+ * GET /payments/count — total number of payments (admin dashboard KPI).
+ * Returns a raw number (no envelope).
+ * @returns {Promise<number>}
+ */
+export async function getPaymentsCount() {
+  return apiRequest("/payments/count", { token: getToken() });
+}
+
+/**
+ * GET /payments/all — every payment across all users (admin). Newest first.
+ * @returns {Promise<Array<{paymentId, orderId, userId, amount, status, createdDate}>>}
+ */
+export async function getAllPayments() {
+  return apiRequest("/payments/all", { token: getToken() });
+}
+
+/**
  * GET /payments/{paymentId} — single payment details.
  * @returns {Promise<{paymentId, orderId, userId, amount, status}>}
  */
@@ -32,7 +49,10 @@ export async function getPayment(paymentId) {
 
 /**
  * POST /payments/process — wallet/mock payment for an order.
- * @param {{userId, orderId, amount, idempotencyKey}} payload
+ * For real wallet debits pass paymentMethod: "WALLET" and the user's 6-digit
+ * walletPin — the service verifies the PIN (and wallet block status) before
+ * debiting. An incorrect PIN comes back as { status: "FAILED", message }.
+ * @param {{userId, orderId, amount, idempotencyKey, paymentMethod?, walletPin?}} payload
  * @returns {Promise<{paymentId, status, message}>}
  */
 export async function processWalletPayment(payload) {

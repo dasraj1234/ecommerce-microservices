@@ -74,15 +74,23 @@ public class RazorpayService {
                 request.getOrderId()
         );
 
+        System.out.println("OUR ORDER ID = " + request.getOrderId());
         Order order =
                 razorpayClient.orders.create(options);
 
-        return new RazorpayOrderResponse(
-                order.get("id"),
-                keyId,
-                request.getAmount(),
-                "INR"
-        );
+       return new RazorpayOrderResponse(
+
+        order.get("id").toString(),        // Razorpay Order ID
+
+        request.getOrderId(),   // OUR Order ID
+
+        keyId,
+
+        request.getAmount(),
+
+        "INR"
+
+);
     }
 
 
@@ -113,6 +121,7 @@ System.out.println(
     "RAZORPAY ORDER = " +
     request.getRazorpayOrderId()
 );
+
 
 System.out.println(
     "PAYMENT ID = " +
@@ -167,7 +176,7 @@ try {
 
     ex.printStackTrace();
 
-    throw ex;
+    verified = false;
 }
 
 //razorpay integration 12th june

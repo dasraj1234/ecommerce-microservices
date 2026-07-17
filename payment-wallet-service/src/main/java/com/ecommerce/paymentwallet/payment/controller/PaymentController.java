@@ -69,6 +69,20 @@ public List<PaymentDetailsResponse> getPaymentsByUser(
     );
 }
 
+@Operation(summary = "Total payment count (admin)")
+@GetMapping("/count")
+public long countPayments() {
+
+    return paymentService.countPayments();
+}
+
+@Operation(summary = "Get all payments (admin)")
+@GetMapping("/all")
+public List<PaymentDetailsResponse> getAllPayments() {
+
+    return paymentService.getAllPayments();
+}
+
 
 //razorpay integration 12th june
 @Operation(summary = "Create Razorpay Order")
@@ -203,5 +217,6 @@ private PaymentResponse buildVerifyResponse(String paymentId, String razorpayPay
     }
     return response;
 }
+
 
 }

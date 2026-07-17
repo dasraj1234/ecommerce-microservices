@@ -24,6 +24,10 @@
         💳 Payments
     </a>
 
+    <a href="/admin/payment-mis">
+        📊 Payment MIS
+    </a>
+    
     <hr>
 
     <a href="/">

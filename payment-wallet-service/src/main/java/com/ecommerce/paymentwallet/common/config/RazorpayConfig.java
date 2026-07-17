@@ -1,29 +1,30 @@
-//razorpay integration 12th june
-
-package com.ecommerce.paymentwallet.config;
+package com.ecommerce.paymentwallet.common.config;
 
 import com.razorpay.RazorpayClient;
-import com.razorpay.RazorpayException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-//improvements 14th june
+
 @Configuration
 public class RazorpayConfig {
 
     @Value("${razorpay.key.id}")
-    private String keyId;
+    private String key;
 
     @Value("${razorpay.key.secret}")
-    private String keySecret;
+    private String secret;
 
     @Bean
-    public RazorpayClient razorpayClient()
-            throws RazorpayException {
-//improvements 14th june
+    public RazorpayClient razorpayClient() throws Exception {
+
         return new RazorpayClient(
-                keyId,
-                keySecret
+
+                key,
+
+                secret
+
         );
+
     }
+
 }
