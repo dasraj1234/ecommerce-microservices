@@ -1,6 +1,6 @@
-//email smtp implemented.
-
 package com.ecommerce.paymentwallet.notification.repository;
+
+import java.util.List;
 
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
@@ -18,40 +18,30 @@ public class CustomerContactRepository {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    public CustomerContact findByUserId(
-            String userId) {
+    public CustomerContact findByUserId(String userId) {
 
         String sql =
-                "SELECT * " +
-                "FROM customer_contact " +
-                "WHERE user_id=?";
+                "SELECT user_id, username, email " +
+                "FROM users " +
+                "WHERE user_id = ?";
 
-        return jdbcTemplate.queryForObject(
-                sql,
-                (rs,rowNum)->{
+        List<CustomerContact> list =
+                jdbcTemplate.query(
+                        sql,
+                        (rs, rowNum) -> {
+                            CustomerContact c = new CustomerContact();
+                            c.setUserId(rs.getString("user_id"));
+                            c.setCustomerName(rs.getString("username"));
+                            c.setEmail(rs.getString("email"));
+                            return c;
+                        },
+                        userId
+                );
 
-                    CustomerContact c =
-                            new CustomerContact();
+        System.out.println("CUSTOMER LOOKUP for userId=" + userId
+                + " → found=" + !list.isEmpty()
+                + (list.isEmpty() ? "" : " email=" + list.get(0).getEmail()));
 
-                    c.setUserId(
-                            rs.getString(
-                                    "user_id"));
-
-                    c.setCustomerName(
-                            rs.getString(
-                                    "customer_name"));
-
-                    c.setEmail(
-                            rs.getString(
-                                    "email"));
-
-                    c.setMobileNumber(
-                            rs.getString(
-                                    "mobile_number"));
-
-                    return c;
-                },
-                userId
-        );
+        return list.isEmpty() ? null : list.get(0);
     }
 }
