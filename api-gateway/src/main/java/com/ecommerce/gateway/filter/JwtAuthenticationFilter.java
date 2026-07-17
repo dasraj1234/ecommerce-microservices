@@ -67,10 +67,9 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
             new Rule(HttpMethod.PATCH,  "/orders/*/status"),
             new Rule(HttpMethod.GET,    "/payments/count"),
             new Rule(HttpMethod.GET,    "/payments/all"),
-            // Category tree is admin reference data — only the product-create
-            // form uses it today.
-            new Rule(HttpMethod.GET,    "/categories/**"),
-            new Rule(HttpMethod.GET,    "/users/all")
+            new Rule(HttpMethod.GET,    "/users/all"),
+            // Payment MIS report + Excel export are admin-only.
+            new Rule(HttpMethod.GET,    "/admin/payments/**")
     );
 
     // GET endpoints whose {userId} path segment must equal the caller's own
