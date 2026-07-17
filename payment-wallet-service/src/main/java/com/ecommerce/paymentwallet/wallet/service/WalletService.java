@@ -154,6 +154,11 @@ public String changePin(String userId, String oldPin, String newPin) {
                         userId
                 );
 
+        if (encodedPin == null) {
+            // PIN was never set — cannot authorise any payment
+            return false;
+        }
+
         boolean matched =
                 passwordEncoder.matches(
                         enteredPin,

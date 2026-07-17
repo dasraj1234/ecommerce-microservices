@@ -329,8 +329,8 @@ function WalletPinDialog({ userId, amount, onConfirm, onCancel }) {
   const [warn, setWarn] = useState("");
 
   const submit = () => {
-    if (!/^\d{6}$/.test(pin)) {
-      setWarn("Please enter your 6 digit PIN.");
+    if (!/^\d{4,6}$/.test(pin)) {
+      setWarn("Please enter your 4 to 6 digit PIN.");
       return;
     }
     onConfirm(pin);
@@ -344,7 +344,7 @@ function WalletPinDialog({ userId, amount, onConfirm, onCancel }) {
             type="password"
             inputMode="numeric"
             maxLength={6}
-            label="6-digit wallet PIN"
+            label="Wallet PIN (4–6 digits)"
             placeholder="••••••"
             value={pin}
             autoFocus
