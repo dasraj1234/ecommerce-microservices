@@ -8,7 +8,7 @@ import { register } from "../../api/auth";
 //   response: created User { id, username, email, role, createdAt }
 export default function Signup() {
   const navigate = useNavigate();
-  const [form, setForm] = useState({ username: "", email: "", password: "" });
+  const [form, setForm] = useState({ username: "", email: "", password: "", role: "USER" });
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -33,7 +33,7 @@ export default function Signup() {
   return (
     <div className="flex min-h-screen">
       {/* Brand panel */}
-      <div className="hidden w-1/2 flex-col justify-between bg-ink-950 p-12 text-white lg:flex">
+      <div className="surface-ink hidden w-1/2 flex-col justify-between p-12 text-white lg:flex">
         <div className="flex items-center gap-2">
           <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand font-display text-sm font-bold text-ink-900">
             E
@@ -42,11 +42,11 @@ export default function Signup() {
         </div>
         <div>
           <p className="font-display text-3xl font-semibold leading-tight">
-            Get your own line on the manifest.
+            Start shopping smarter today.
           </p>
           <p className="mt-3 max-w-sm text-white/45">
-            One account gets you the storefront, order history, and payments
-            — all in one place.
+            Create your account and unlock the storefront, order history, and
+            a secure wallet — all in one place.
           </p>
         </div>
         <p className="text-xs text-white/25">© {new Date().getFullYear()} EcomVerse Platform</p>
@@ -61,6 +61,28 @@ export default function Signup() {
           </p>
 
           <form onSubmit={onSubmit} className="mt-8 space-y-5">
+            <div>
+              <label className="mb-1.5 block text-xs font-medium uppercase tracking-wide text-ink-600">
+                Account type
+              </label>
+              <div className="grid grid-cols-2 gap-2">
+                {["USER", "ADMIN"].map((r) => (
+                  <button
+                    key={r}
+                    type="button"
+                    onClick={() => setForm((f) => ({ ...f, role: r }))}
+                    className={`rounded-lg border px-3.5 py-2.5 text-sm font-medium transition ${
+                      form.role === r
+                        ? "border-brand bg-brand/10 text-ink-900"
+                        : "border-ink-900/10 bg-white text-ink-600 hover:border-ink-900/20"
+                    }`}
+                  >
+                    {r === "USER" ? "Customer" : "Admin"}
+                  </button>
+                ))}
+              </div>
+            </div>
+
             <div>
               <label className="mb-1.5 block text-xs font-medium uppercase tracking-wide text-ink-600">
                 Username

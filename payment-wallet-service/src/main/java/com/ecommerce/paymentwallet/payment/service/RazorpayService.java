@@ -223,9 +223,7 @@ logRepository.log(
         "RAZORPAY_VERIFIED"
 );
 
-try {
-
-      System.out.println("BEFORE CUSTOMER LOOKUP");
+    System.out.println("BEFORE CUSTOMER LOOKUP");
 
     new Thread(() -> {
 
@@ -252,28 +250,12 @@ try {
 
     } catch (Exception ex) {
 
-        System.out.println("EMAIL FAILED");
-
+        System.out.println("EMAIL FAILED: " + ex.getClass().getSimpleName() + " — " + ex.getMessage());
+        if (ex.getCause() != null) System.out.println("CAUSED BY: " + ex.getCause().getMessage());
         ex.printStackTrace();
     }
 
 }).start();
-
-
-    System.out.println(
-            "EMAIL SENT"  //email smtp implemented.
-
-    );
-
-} catch (Exception ex) {
-
-    System.out.println(
-            "EMAIL FAILED"   //email smtp implemented.
-
-    );
-
-    ex.printStackTrace();
-}
 
 return paymentId;   // IMPORTANT
 

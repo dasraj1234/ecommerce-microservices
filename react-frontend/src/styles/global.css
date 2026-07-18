@@ -12,6 +12,25 @@ body {
   @apply bg-paper font-body text-ink-900 antialiased;
 }
 
+/* Glossy ink surfaces — replaces flat hard-black panels with layered
+   gradients: a warm brand glow, a cool teal glow, and a diagonal sheen
+   for depth. Used on full-bleed dark panels (auth, landing). */
+.surface-ink {
+  background-color: #0e1016;
+  background-image:
+    radial-gradient(120% 80% at 12% -10%, rgba(255, 140, 50, 0.12) 0%, transparent 45%),
+    radial-gradient(110% 90% at 100% 110%, rgba(31, 111, 107, 0.16) 0%, transparent 52%),
+    linear-gradient(155deg, #1c1f2b 0%, #12141d 52%, #0a0b10 100%);
+}
+
+/* Narrower vertical variant for the sidebar and console strips. */
+.surface-ink-panel {
+  background-color: #171923;
+  background-image:
+    radial-gradient(120% 35% at 50% -5%, rgba(255, 140, 50, 0.08) 0%, transparent 60%),
+    linear-gradient(180deg, #222635 0%, #171923 42%, #101219 100%);
+}
+
 /* Signature element: IDs throughout the app (orders, products, payments,
    users) render as a small "manifest tag" — a mono-font stub with a
    dashed perforation edge, like a torn ticket. Ties the whole system's

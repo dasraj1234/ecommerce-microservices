@@ -42,6 +42,14 @@ spring:
           predicates:
             - Path=/wallet/**,/payments/**
 
+        # Admin Payment MIS (transaction report + Excel export) lives in the
+        # payment-wallet-service. Routed here so the React admin app can reach
+        # it through the gateway instead of the standalone JSP page on :8082.
+        - id: payment-mis
+          uri: http://localhost:8083
+          predicates:
+            - Path=/admin/payments/**
+
 management:
   endpoints:
     web:

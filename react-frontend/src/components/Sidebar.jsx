@@ -23,6 +23,9 @@ const ICONS = {
   logout: (
     <path d="M9 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h4M16 17l5-5-5-5M21 12H9" />
   ),
+  mis: (
+    <path d="M3 3v18h18M8 17V9m5 8V5m5 12v-6" />
+  ),
 };
 
 function Icon({ name }) {
@@ -48,6 +51,7 @@ const NAV = {
     { to: "/admin/products", label: "Products", icon: "products" },
     { to: "/admin/orders", label: "Orders", icon: "orders" },
     { to: "/admin/payments", label: "Payments", icon: "payments" },
+    { to: "/admin/mis", label: "Payment MIS", icon: "mis" },
   ],
   customer: [
     { to: "/customer/home", label: "Store", icon: "home" },
@@ -69,7 +73,7 @@ export default function Sidebar({ type = "customer" }) {
   };
 
   return (
-    <aside className="sticky top-0 flex h-screen w-64 shrink-0 flex-col bg-ink-900 text-white/90">
+    <aside className="surface-ink sticky top-0 flex h-screen w-64 shrink-0 flex-col text-white/90">
       <div className="flex items-center gap-2 px-6 py-6">
         <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand font-display text-sm font-bold text-ink-900">
           E
@@ -83,33 +87,62 @@ export default function Sidebar({ type = "customer" }) {
       </div>
 
       <nav className="sidebar-scroll flex-1 space-y-1 overflow-y-auto px-3">
-        {items.map((item) => (
-          <NavLink
-            key={item.to}
-            to={item.to}
-            className={({ isActive }) =>
-              `group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition ${
-                isActive
-                  ? "bg-white/10 text-white"
-                  : "text-white/55 hover:bg-white/5 hover:text-white/90"
-              }`
-            }
-          >
-            {({ isActive }) => (
-              <>
-                <span
-                  className={`flex h-1.5 w-1.5 shrink-0 rounded-full transition ${
-                    isActive ? "bg-brand" : "bg-transparent"
-                  }`}
-                />
-                <span className={isActive ? "text-brand" : "text-white/40 group-hover:text-white/70"}>
-                  <Icon name={item.icon} />
-                </span>
-                {item.label}
-              </>
-            )}
-          </NavLink>
-        ))}
+        {items.map((item) =>
+          item.external ? (
+            <a
+              key={item.href}
+              href={item.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-white/55 transition hover:bg-white/5 hover:text-white/90"
+            >
+              <span className="flex h-1.5 w-1.5 shrink-0 rounded-full bg-transparent" />
+              <span className="text-white/40 group-hover:text-white/70">
+                <Icon name={item.icon} />
+              </span>
+              {item.label}
+              <svg
+                viewBox="0 0 24 24"
+                width="13"
+                height="13"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.8"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="ml-auto text-white/30 group-hover:text-white/60"
+              >
+                <path d="M7 17 17 7M8 7h9v9" />
+              </svg>
+            </a>
+          ) : (
+            <NavLink
+              key={item.to}
+              to={item.to}
+              className={({ isActive }) =>
+                `group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition ${
+                  isActive
+                    ? "bg-white/10 text-white"
+                    : "text-white/55 hover:bg-white/5 hover:text-white/90"
+                }`
+              }
+            >
+              {({ isActive }) => (
+                <>
+                  <span
+                    className={`flex h-1.5 w-1.5 shrink-0 rounded-full transition ${
+                      isActive ? "bg-brand" : "bg-transparent"
+                    }`}
+                  />
+                  <span className={isActive ? "text-brand" : "text-white/40 group-hover:text-white/70"}>
+                    <Icon name={item.icon} />
+                  </span>
+                  {item.label}
+                </>
+              )}
+            </NavLink>
+          )
+        )}
       </nav>
 
       <div className="border-t border-white/10 px-4 py-4">

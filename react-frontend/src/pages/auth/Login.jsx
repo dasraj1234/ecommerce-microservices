@@ -61,7 +61,7 @@ export default function Login() {
   return (
     <div className="flex min-h-screen">
       {/* Brand panel */}
-      <div className="hidden w-1/2 flex-col justify-between bg-ink-950 p-12 text-white lg:flex">
+      <div className="surface-ink hidden w-1/2 flex-col justify-between p-12 text-white lg:flex">
         <div className="flex items-center gap-2">
           <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand font-display text-sm font-bold text-ink-900">
             E
@@ -70,7 +70,7 @@ export default function Login() {
         </div>
         <div>
           <p className="font-display text-3xl font-semibold leading-tight">
-            Welcome back to the manifest.
+            Welcome to the Smart E-Commerce Platform.
           </p>
           <p className="mt-3 max-w-sm text-white/45">
             Track products, orders, and payments across every service from one
@@ -83,6 +83,16 @@ export default function Login() {
       {/* Form panel */}
       <div className="flex w-full items-center justify-center bg-paper p-6 lg:w-1/2">
         <div className="w-full max-w-sm">
+          <Link
+            to="/"
+            className="mb-6 inline-flex items-center gap-1.5 text-sm text-ink-600 hover:text-ink-900 transition"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+              <polyline points="9 22 9 12 15 12 15 22" />
+            </svg>
+            Home
+          </Link>
           <h1 className="font-display text-2xl font-semibold text-ink-900">Log in</h1>
           <p className="mt-1.5 text-sm text-ink-600">
             Enter your credentials to reach your console.

@@ -265,4 +265,19 @@ public void updateOrderId(String paymentId, String orderId) {
     );
 }
 
+    /**
+     * Returns WALLET payments with status SUCCESS whose order is CANCELLED.
+     * Used by ReconciliationScheduler to auto-refund failed orders.
+     */
+    public List<Map<String, Object>> findWalletPaymentsForRefund() {
+        String sql =
+            "SELECT p.payment_id, p.order_id, p.user_id, p.amount " +
+            "FROM payments p " +
+            "INNER JOIN orders o ON p.order_id = o.order_id " +
+            "WHERE p.payment_method = 'WALLET' " +
+            "AND p.status = 'SUCCESS' " +
+            "AND o.status = 'CANCELLED'";
+        return jdbcTemplate.queryForList(sql);
+    }
+
 }

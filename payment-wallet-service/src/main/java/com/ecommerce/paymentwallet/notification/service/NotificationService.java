@@ -81,6 +81,24 @@ public class NotificationService {
         mailSender.send(message);
     }
 
+    public void sendRefundMail(String email, String userId, String paymentId, String orderId, double amount) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setFrom(fromEmail);
+        message.setTo(email);
+        message.setSubject("EcomVerse — Wallet Refund Processed");
+        message.setText(
+                "Hello,\n\n"
+                + "Your wallet has been automatically refunded for a cancelled order.\n\n"
+                + "User ID    : " + userId + "\n"
+                + "Order ID   : " + orderId + "\n"
+                + "Payment ID : " + paymentId + "\n"
+                + "Refund     : ₹" + amount + "\n\n"
+                + "The amount has been credited back to your EcomVerse wallet.\n\n"
+                + "— EcomVerse Team"
+        );
+        mailSender.send(message);
+    }
+
     public void sendFraudAlertMail(String userId, String reason, double amount) {
 
         SimpleMailMessage message = new SimpleMailMessage();

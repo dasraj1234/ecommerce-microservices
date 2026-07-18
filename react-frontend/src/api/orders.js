@@ -76,3 +76,30 @@ export async function getAllOrders() {
   const res = await apiRequest("/orders/all", { token: getToken() });
   return unwrap(res);
 }
+
+// ─── Admin Stats ────────────────────────────────────────────────────────────
+
+/** GET /orders/stats/top-products?limit=N */
+export async function getTopProducts(limit = 10) {
+  return apiRequest(`/orders/stats/top-products?limit=${limit}`, { token: getToken() });
+}
+
+/** GET /orders/stats/categories */
+export async function getStatsByCategory() {
+  return apiRequest("/orders/stats/categories", { token: getToken() });
+}
+
+/** GET /orders/stats/price-ranges */
+export async function getStatsByPriceRange() {
+  return apiRequest("/orders/stats/price-ranges", { token: getToken() });
+}
+
+/** GET /orders/stats/monthly */
+export async function getMonthlyStats() {
+  return apiRequest("/orders/stats/monthly", { token: getToken() });
+}
+
+/** GET /orders/stats/mis */
+export async function getMISReport() {
+  return apiRequest("/orders/stats/mis", { token: getToken() });
+}

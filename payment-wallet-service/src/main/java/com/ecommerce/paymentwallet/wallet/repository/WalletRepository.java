@@ -591,6 +591,18 @@ public class WalletRepository {
     // SECURITY LOG
     //--------------------------------------------------
 
+    public String getBlockedReason(String userId) {
+        try {
+            return jdbcTemplate.queryForObject(
+                    "SELECT blocked_reason FROM wallets WHERE user_id=?",
+                    String.class,
+                    userId
+            );
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
     public void saveSecurityLog(
 
             String walletId,

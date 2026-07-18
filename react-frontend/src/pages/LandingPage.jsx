@@ -1,14 +1,8 @@
 import { Link } from "react-router-dom";
 
-const SERVICES = [
-  { name: "Auth & Users", port: "8081", routes: "/auth · /users" },
-  { name: "Catalog & Orders", port: "8082", routes: "/products · /orders" },
-  { name: "Payments & Wallet", port: "8083", routes: "/payments · /wallet" },
-];
-
 export default function LandingPage() {
   return (
-    <div className="min-h-screen bg-ink-950 px-6 py-16 text-white">
+    <div className="surface-ink min-h-screen px-6 py-16 text-white">
       <div className="mx-auto max-w-5xl">
         {/* Masthead */}
         <div className="mb-14 flex items-center gap-3">
@@ -33,29 +27,6 @@ export default function LandingPage() {
           A single portal in front of four independent services. Pick a lane
           below to open the console built for it.
         </p>
-
-        {/* Service manifest console — signature element */}
-        <div className="mt-12 rounded-2xl border border-white/10 bg-white/[0.03] p-5 font-mono text-sm">
-          <p className="mb-3 text-xs uppercase tracking-[0.2em] text-white/30">
-            Service Manifest
-          </p>
-          <div className="space-y-2.5">
-            {SERVICES.map((s) => (
-              <div
-                key={s.name}
-                className="flex flex-wrap items-center justify-between gap-2 border-b border-white/5 pb-2.5 last:border-0 last:pb-0"
-              >
-                <div className="flex items-center gap-3">
-                  <span className="status-dot bg-emerald-400" />
-                  <span className="text-white/80">{s.name}</span>
-                  <span className="text-white/25">:{s.port}</span>
-                </div>
-                <span className="text-white/30">{s.routes}</span>
-                <span className="text-xs font-medium text-emerald-400">OPERATIONAL</span>
-              </div>
-            ))}
-          </div>
-        </div>
 
         {/* Portal picker */}
         <div className="mt-8 grid gap-5 sm:grid-cols-2">

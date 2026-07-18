@@ -69,7 +69,9 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
             new Rule(HttpMethod.GET,    "/payments/all"),
             new Rule(HttpMethod.GET,    "/users/all"),
             // Payment MIS report + Excel export are admin-only.
-            new Rule(HttpMethod.GET,    "/admin/payments/**")
+            new Rule(HttpMethod.GET,    "/admin/payments/**"),
+            // Order stats and MIS dashboard are admin-only.
+            new Rule(HttpMethod.GET,    "/orders/stats/**")
     );
 
     // GET endpoints whose {userId} path segment must equal the caller's own

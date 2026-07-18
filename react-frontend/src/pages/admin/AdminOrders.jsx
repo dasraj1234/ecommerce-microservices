@@ -197,7 +197,7 @@ export default function AdminOrders() {
         </div>
       </Card>
 
-      <div className="mt-6 rounded-2xl bg-ink-900 p-5 font-mono text-xs">
+      <div className="surface-ink-panel mt-6 rounded-2xl p-5 font-mono text-xs">
         <p className="mb-2 text-[11px] uppercase tracking-[0.2em] text-white/30">Console</p>
         <div className="space-y-1.5">
           {log.map((entry, i) => (

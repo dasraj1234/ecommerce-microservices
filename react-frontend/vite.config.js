@@ -19,6 +19,11 @@ export default defineConfig({
       "/categories": GATEWAY,
       "/payments": GATEWAY,
       "/wallet": GATEWAY,
+      // Only the MIS API path — NOT all of /admin, which would shadow the
+      // React client routes (/admin/dashboard, /admin/mis, ...). Both the data
+      // (/admin/payments/mis) and Excel (/admin/payments/mis/download) live
+      // under this prefix.
+      "/admin/payments/mis": GATEWAY,
     },
   },
 });

@@ -21,4 +21,8 @@ public class RegisterRequest {
     @NotBlank(message = "Password is required")
     private String password;
 
+    // Optional. "ADMIN" or "USER" (case-insensitive). Absent/blank/unknown
+    // values default to USER in UserService.register().
+    private String role;
+
 }

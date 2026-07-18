@@ -7,6 +7,7 @@ import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminProducts from "./pages/admin/AdminProducts";
 import AdminOrders from "./pages/admin/AdminOrders";
 import AdminPayments from "./pages/admin/AdminPayments";
+import AdminMIS from "./pages/admin/AdminMIS";
 import CustomerHome from "./pages/customer/CustomerHome";
 import CustomerOrders from "./pages/customer/CustomerOrders";
 import CustomerPayments from "./pages/customer/CustomerPayments";
@@ -29,6 +30,7 @@ export default function App() {
       <Route path="/admin/products" element={admin(<AdminProducts />)} />
       <Route path="/admin/orders" element={admin(<AdminOrders />)} />
       <Route path="/admin/payments" element={admin(<AdminPayments />)} />
+      <Route path="/admin/mis" element={admin(<AdminMIS />)} />
 
       {/* Customer-only */}
       <Route path="/customer/home" element={customer(<CustomerHome />)} />
